@@ -1,11 +1,13 @@
-import 'package:app_lcc/Services/user_services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'Pages/cadastro_usuario_page.dart';
 import 'Pages/home/tela_principal_page.dart';
+
 import 'Services/lista_de_compras_services.dart';
+import 'Services/user_services.dart';
 
 
 void main() async {
@@ -48,9 +50,10 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 175, 46, 46)),
           useMaterial3: true,
         ),
-        initialRoute: '/main',
+        initialRoute: '/cadastroUsuario',
         routes: {
             '/main':(context) => TelaPrincipalPage(),
+            '/cadastroUsuario': (context) => const CadastroUsuarioPage(),
         },     
         debugShowCheckedModeBanner: false,
       ),
