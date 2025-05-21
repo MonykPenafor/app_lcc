@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'Pages/cadastro_usuario_page.dart';
+import 'Pages/home/main_navigation_page.dart';
 import 'Pages/home/tela_principal_page.dart';
 
 import 'Services/lista_de_compras_services.dart';
@@ -50,10 +51,12 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 175, 46, 46)),
           useMaterial3: true,
         ),
-        initialRoute: '/cadastroUsuario',
+        initialRoute: '/mainNav',
         routes: {
-            '/main':(context) => TelaPrincipalPage(),
+            // '/login':(context) => LoginPage(),
             '/cadastroUsuario': (context) => const CadastroUsuarioPage(),
+            '/mainNav' :(context) => const MainNavigationPage(),
+            '/main':(context) => TelaPrincipalPage(),
         },     
         debugShowCheckedModeBanner: false,
       ),
