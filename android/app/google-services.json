@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "70967126082",
+    "project_id": "app-lcc-cbfa9",
+    "storage_bucket": "app-lcc-cbfa9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:70967126082:android:15adb01ca0d2a6c21165db",
+        "android_client_info": {
+          "package_name": "com.example.app_lcc"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCY_iaKRVeCj5xDP64ad7FZGrCWUQgS2CY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
