@@ -1,5 +1,6 @@
 import 'package:app_lcc/Models/app_user.dart';
 import 'package:app_lcc/Models/lista_de_compras.dart';
+import 'package:app_lcc/Pages/compras_listas/compras_listas_itens_page.dart';
 import 'package:app_lcc/Services/lista_de_compras_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -49,75 +50,80 @@ class TelaPrincipalPage extends StatelessWidget {
                         );
                       }
 
-                        return ListView.builder(
-                          itemCount: snapshot.data!.docs.length,
-                          itemBuilder: (context, index) {
-                            DocumentSnapshot ds = snapshot.data!.docs[index];
-                            ListaDeCompras _lista = ListaDeCompras.fromDocument(ds);
+                      return ListView.builder(
+                        itemCount: snapshot.data!.docs.length,
+                        itemBuilder: (context, index) {
+                          DocumentSnapshot ds = snapshot.data!.docs[index];
+                          ListaDeCompras _lista =
+                              ListaDeCompras.fromDocument(ds);
 
-                            return GestureDetector(
-                              child: Container(
-                                margin: const EdgeInsets.only(bottom: 5),
-                                child: InkWell(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                  onTap: () {
-                                    // Navigator.push(context, MaterialPageRoute(builder: (context) =>
-                                    //         EventNavigationPage(event: _event),
-                                    //   ),
-                                    // );
-                                  },
-                                  
-                                  child: Ink(
-                                    decoration: BoxDecoration(
-                                      color: const Color.fromARGB(
-                                          255, 168, 217, 255),
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: const Color.fromARGB(
-                                                  255, 161, 194, 255)
-                                              .withOpacity(0.2),
-                                          blurRadius: 4,
-                                          spreadRadius: 1,
-                                        ),
-                                      ],
-                                    ),
-                                    child: Card(
-                                      elevation: 0,
-                                      color: Colors.transparent,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
+                          return GestureDetector(
+                            child: Container(
+                              margin: const EdgeInsets.only(bottom: 5),
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(8.0),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          ComprasListasItensPage(
+                                        listaId: _lista
+                                            .id!, // Certifique-se de que `id` existe em ListaDeCompras
+                                        listaNome: _lista.nome ?? 'Sem nome',
                                       ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(16.0),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              _lista.nome!,
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16.0,
-                                              ),
+                                    ),
+                                  );
+                                },
+                                child: Ink(
+                                  decoration: BoxDecoration(
+                                    color: const Color.fromARGB(
+                                        255, 168, 217, 255),
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color.fromARGB(
+                                                255, 161, 194, 255)
+                                            .withOpacity(0.2),
+                                        blurRadius: 4,
+                                        spreadRadius: 1,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Card(
+                                    elevation: 0,
+                                    color: Colors.transparent,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            _lista.nome!,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16.0,
                                             ),
-                                            Text(
-                                              _lista.categoria!,
-                                              style: const TextStyle(
-                                                  fontSize: 14.0),
-                                            ),
-                                          ],
-                                        ),
+                                          ),
+                                          Text(
+                                            _lista.categoria!,
+                                            style:
+                                                const TextStyle(fontSize: 14.0),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ),
                                 ),
                               ),
-                            );
-                          },
-                        );
-                    
+                            ),
+                          );
+                        },
+                      );
                     },
                   );
                 },
@@ -185,10 +191,10 @@ class TelaPrincipalPage extends StatelessWidget {
                       }
 
                       var novaLista = ListaDeCompras(
-                        nome: nome,
-                        categoria: categoria,
-                        usuarioCriador: 'usuario1' //appUser.id,
-                      );
+                          nome: nome,
+                          categoria: categoria,
+                          usuarioCriador: 'usuario1' //appUser.id,
+                          );
 
                       var result = await listaServices.salvarLista(novaLista);
 
