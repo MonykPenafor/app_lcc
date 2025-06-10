@@ -102,8 +102,8 @@ class _ComprasListasItensPageState extends State<ComprasListasItensPage> {
       listaId: widget.listaId,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
-      userId: FirebaseAuth.instance.currentUser!.uid,
-      id: '', // Adicionar se usar autenticação
+      //userId: FirebaseAuth.instance.currentUser!.uid,
+      //idItem: '', // Adicionar se usar autenticação
     );
     try {
       await _listaService.addItem(widget.listaId, newItem);
