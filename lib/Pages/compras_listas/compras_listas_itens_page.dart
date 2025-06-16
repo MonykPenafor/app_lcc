@@ -5,11 +5,10 @@ import 'package:app_lcc/Models/item.dart';
 import 'package:app_lcc/Services/lista_de_compras_services.dart';
 
 class ComprasListasItensPage extends StatefulWidget {
-  final String listaId;
-  final String listaNome;
+  final String id;
+  final String nome;
 
-  const ComprasListasItensPage(
-      {Key? key, required this.listaId, required this.listaNome})
+  const ComprasListasItensPage({Key? key, required this.id, required this.nome})
       : super(key: key);
 
   @override
@@ -99,14 +98,14 @@ class _ComprasListasItensPageState extends State<ComprasListasItensPage> {
           : '1',
       obs: _obsController.text,
       isBought: false, // Novo item sempre pendente
-      listaId: widget.listaId,
+      listaId: widget.id,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
-      userId: FirebaseAuth.instance.currentUser!.uid,
-      id: '', // Adicionar se usar autenticação
+      //userId: FirebaseAuth.instance.currentUser!.uid,
+      //idItem: '', // Adicionar se usar autenticação
     );
     try {
-      await _listaService.addItem(widget.listaId, newItem);
+      await _listaService.addItem(widget.id, newItem);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             content: Text('"${newItem.itemNome}" adicionado!'),
@@ -125,10 +124,10 @@ class _ComprasListasItensPageState extends State<ComprasListasItensPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.listaNome),
+        title: Text(widget.nome),
       ),
       body: StreamBuilder<List<Item>>(
-        stream: _listaService.getItemsStream(widget.listaId),
+        stream: _listaService.getItemsStream(widget.id),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -148,8 +147,34 @@ class _ComprasListasItensPageState extends State<ComprasListasItensPage> {
             itemBuilder: (context, index) {
               final item = itens[index];
               return ListTile(
-                title: Text(item.itemNome),
-                subtitle: Text('Qdt:${item.quantidade}'),
+                leading: Checkbox(
+                    value: item.isBought,
+                    onChanged: (bool? newValue) {
+                      if (newValue != null) {
+                        _updateItemStatus(item, newValue);
+                      }
+                    }),
+                title: Text(
+                  item.itemNome,
+                  style: TextStyle(
+                    decoration: item.isBought
+                        ? TextDecoration.lineThrough
+                        : TextDecoration.none,
+                    color: item.isBought ? Colors.grey : null,
+                  ),
+                ),
+                subtitle: Text(
+                  'Qdt:${item.quantidade}${item.obs != null && item.obs!.isNotEmpty ? " - Obs: ${item.obs}" : ""}',
+                  style: TextStyle(
+                    decoration: item.isBought
+                        ? TextDecoration.lineThrough
+                        : TextDecoration.none,
+                    color: item.isBought ? Colors.grey : null,
+                  ),
+                ),
+                onTap: () {
+                  _updateItemStatus(item, !item.isBought);
+                },
               );
             },
           );
@@ -161,5 +186,26 @@ class _ComprasListasItensPageState extends State<ComprasListasItensPage> {
         child: const Icon(Icons.add),
       ),
     );
+  }
+
+  Future<void> _updateItemStatus(Item item, bool newStatus) async {
+    if (item.idItem == null) {
+      print("Erro> ID do item é nulo.");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text("Erro ao atualizar item: ID não encontrado."),
+            backgroundColor: Colors.red),
+      );
+      return;
+    }
+    try {
+      await _listaService.updateItemStatus(widget.id, item.idItem!, newStatus);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text("Erro ao atualizar status: $e"),
+            backgroundColor: Colors.red),
+      );
+    }
   }
 }

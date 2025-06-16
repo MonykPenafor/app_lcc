@@ -67,9 +67,9 @@ class ListaDeComprasServices extends ChangeNotifier {
         .snapshots();
   }
 
-  Future<Map<String, dynamic>> excluirLista(String? listaId) async {
+  Future<Map<String, dynamic>> excluirLista(String? id) async {
     try {
-      await _collectionRefLista.doc(listaId).delete();
+      await _collectionRefLista.doc(id).delete();
 
       return {
         'success': true,
@@ -110,21 +110,35 @@ class ListaDeComprasServices extends ChangeNotifier {
         toFirestore: (Item item, _) => item.toFirestore(),
       );
 
-  Stream<List<Item>> getItemsStream(String listId) {
-    return _itemsRef(listId)
+  Stream<List<Item>> getItemsStream(String id) {
+    return _itemsRef(id)
         .orderBy('createdAt',
             descending: false) // Ordena por data de criação (ou como preferir)
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) => doc.data()).toList());
   }
 
-  Future<void> addItem(String listId, Item item) async {
+  Future<void> addItem(String id, Item item) async {
     try {
-      await _itemsRef(listId).add(item);
-      print('Item "${item.itemNome}" adicionado com sucesso à lista $listId');
+      await _itemsRef(id).add(item);
+      print('Item "${item.itemNome}" adicionado com sucesso à lista $id');
     } catch (e) {
-      print('Erro ao adicionar item à lista $listId: $e');
+      print('Erro ao adicionar item à lista $id: $e');
       // Re-throw para que a UI possa tratar o erro, se necessário
+      rethrow;
+    }
+  }
+
+  Future<void> updateItemStatus(
+      String id, String idItem, bool newStatus) async {
+    try {
+      await _itemsRef(id).doc(idItem).update({
+        'isBought': newStatus,
+        'updatedAt': Timestamp.now(),
+      });
+      print('Status do item $idItem atualizado para $newStatus na lista $id');
+    } catch (e) {
+      print('Erro ao atualizar status do item $idItem na lista $id: $e');
       rethrow;
     }
   }

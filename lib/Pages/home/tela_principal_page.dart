@@ -68,8 +68,8 @@ class TelaPrincipalPage extends StatelessWidget {
                                     MaterialPageRoute(
                                       builder: (context) =>
                                           ComprasListasItensPage(
-                                        listaId: _lista.id!,
-                                        listaNome: _lista.nome ?? 'Sem nome',
+                                        id: _lista.id!, 
+                                        nome: _lista.nome ?? 'Sem nome',
                                       ),
                                     ),
                                   );
