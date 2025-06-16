@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
 import '../Models/app_user.dart';
+import '../Models/item.dart';
 
 class ListaDeComprasServices extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -100,4 +101,33 @@ class ListaDeComprasServices extends ChangeNotifier {
       return {'success': false, 'message': 'Erro ao compartilhar a lista: $e'};
     }
   }
+
+  
+  CollectionReference<Item> _itemsRef(String listId) => _collectionRef
+      .doc(listId)
+      .collection('itens') // Nome da subcoleção de itens
+      .withConverter<Item>(
+        fromFirestore: Item.fromFirestore,
+        toFirestore: (Item item, _) => item.toFirestore(),
+      );
+
+  Stream<List<Item>> getItemsStream(String listId) {
+    return _itemsRef(listId)
+        .orderBy('createdAt',
+            descending: false) // Ordena por data de criação (ou como preferir)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) => doc.data()).toList());
+  }
+
+  Future<void> addItem(String listId, Item item) async {
+    try {
+      await _itemsRef(listId).add(item);
+      print('Item "${item.itemNome}" adicionado com sucesso à lista $listId');
+    } catch (e) {
+      print('Erro ao adicionar item à lista $listId: $e');
+      // Re-throw para que a UI possa tratar o erro, se necessário
+      rethrow;
+    }
+  }
+
 }
