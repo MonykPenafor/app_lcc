@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import '../../Components/custom_snackbar.dart';
 import '../../Services/user_services.dart';
+import '../compras_listas/compras_listas_itens_page.dart';
 
 class TelaPrincipalPage extends StatelessWidget {
   TelaPrincipalPage({super.key});
@@ -49,128 +50,133 @@ class TelaPrincipalPage extends StatelessWidget {
                         );
                       }
 
-                        return ListView.builder(
-                          itemCount: snapshot.data!.docs.length,
-                          itemBuilder: (context, index) {
-                            DocumentSnapshot ds = snapshot.data!.docs[index];
-                            ListaDeCompras _lista = ListaDeCompras.fromDocument(ds);
+                      return ListView.builder(
+                        itemCount: snapshot.data!.docs.length,
+                        itemBuilder: (context, index) {
+                          DocumentSnapshot ds = snapshot.data!.docs[index];
+                          ListaDeCompras _lista =
+                              ListaDeCompras.fromDocument(ds);
 
-                            return GestureDetector(
-                              child: Container(
-                                margin: const EdgeInsets.only(bottom: 5),
-                                child: InkWell(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                  onTap: () {
-                                    // Navigator.push(context, MaterialPageRoute(builder: (context) =>
-                                    //         EventNavigationPage(event: _event),
-                                    //   ),
-                                    // );
-                                  },
-                                  
-                                  child: Ink(
-                                    decoration: BoxDecoration(
-                                      color: const Color.fromARGB(
-                                          255, 168, 217, 255),
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: const Color.fromARGB(
-                                                  255, 161, 194, 255)
-                                              .withOpacity(0.2),
-                                          blurRadius: 4,
-                                          spreadRadius: 1,
-                                        ),
-                                      ],
-                                    ),
-                                    child: Card(
-                                      elevation: 0,
-                                      color: Colors.transparent,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
+                          return GestureDetector(
+                            child: Container(
+                              margin: const EdgeInsets.only(bottom: 5),
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(8.0),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          ComprasListasItensPage(
+                                        listaId: _lista.id!,
+                                        listaNome: _lista.nome ?? 'Sem nome',
                                       ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(16.0),
-                                        child: Row(
-                                          children: [
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    _lista.nome!,
-                                                    style: const TextStyle(
-                                                      fontWeight: FontWeight.bold,
-                                                      fontSize: 16.0,
-                                                    ),
-                                                  ),
-                                                  Text(
-                                                    _lista.categoria!,
-                                                    style: const TextStyle(
-                                                        fontSize: 14.0),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            PopupMenuButton<String>(
-                                              onSelected: (String value) {
-                                                _handleMenuAction(
-                                                  context, 
-                                                  value, 
-                                                  _lista, 
-                                                  userServices, 
-                                                  listaDeComprasServices
-                                                );
-                                              },
-                                              itemBuilder: (BuildContext context) => [
-                                                const PopupMenuItem<String>(
-                                                  value: 'editar',
-                                                  child: Row(
-                                                    children: [
-                                                      Icon(Icons.edit, size: 20),
-                                                      SizedBox(width: 8),
-                                                      Text('Editar'),
-                                                    ],
+                                    ),
+                                  );
+                                },
+                                child: Ink(
+                                  decoration: BoxDecoration(
+                                    color: const Color.fromARGB(
+                                        255, 168, 217, 255),
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color.fromARGB(
+                                                255, 161, 194, 255)
+                                            .withOpacity(0.2),
+                                        blurRadius: 4,
+                                        spreadRadius: 1,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Card(
+                                    elevation: 0,
+                                    color: Colors.transparent,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  _lista.nome!,
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 16.0,
                                                   ),
                                                 ),
-                                                const PopupMenuItem<String>(
-                                                  value: 'compartilhar',
-                                                  child: Row(
-                                                    children: [
-                                                      Icon(Icons.share, size: 20),
-                                                      SizedBox(width: 8),
-                                                      Text('Compartilhar'),
-                                                    ],
-                                                  ),
-                                                ),
-                                                const PopupMenuItem<String>(
-                                                  value: 'excluir',
-                                                  child: Row(
-                                                    children: [
-                                                      Icon(Icons.delete, 
-                                                           size: 20, 
-                                                           color: Colors.red),
-                                                      SizedBox(width: 8),
-                                                      Text('Excluir',
-                                                           style: TextStyle(color: Colors.red)),
-                                                    ],
-                                                  ),
+                                                Text(
+                                                  _lista.categoria!,
+                                                  style: const TextStyle(
+                                                      fontSize: 14.0),
                                                 ),
                                               ],
-                                              icon: const Icon(Icons.more_vert),
                                             ),
-                                          ],
-                                        ),
+                                          ),
+                                          PopupMenuButton<String>(
+                                            onSelected: (String value) {
+                                              _handleMenuAction(
+                                                  context,
+                                                  value,
+                                                  _lista,
+                                                  userServices,
+                                                  listaDeComprasServices);
+                                            },
+                                            itemBuilder:
+                                                (BuildContext context) => [
+                                              const PopupMenuItem<String>(
+                                                value: 'editar',
+                                                child: Row(
+                                                  children: [
+                                                    Icon(Icons.edit, size: 20),
+                                                    SizedBox(width: 8),
+                                                    Text('Editar'),
+                                                  ],
+                                                ),
+                                              ),
+                                              const PopupMenuItem<String>(
+                                                value: 'compartilhar',
+                                                child: Row(
+                                                  children: [
+                                                    Icon(Icons.share, size: 20),
+                                                    SizedBox(width: 8),
+                                                    Text('Compartilhar'),
+                                                  ],
+                                                ),
+                                              ),
+                                              const PopupMenuItem<String>(
+                                                value: 'excluir',
+                                                child: Row(
+                                                  children: [
+                                                    Icon(Icons.delete,
+                                                        size: 20,
+                                                        color: Colors.red),
+                                                    SizedBox(width: 8),
+                                                    Text('Excluir',
+                                                        style: TextStyle(
+                                                            color: Colors.red)),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                            icon: const Icon(Icons.more_vert),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ),
                                 ),
                               ),
-                            );
-                          },
-                        );
-                    
+                            ),
+                          );
+                        },
+                      );
                     },
                   );
                 },
@@ -238,10 +244,10 @@ class TelaPrincipalPage extends StatelessWidget {
                       }
 
                       var novaLista = ListaDeCompras(
-                        nome: nome,
-                        categoria: categoria,
-                        usuarioCriador: 'usuario1' //appUser.id,
-                      );
+                          nome: nome,
+                          categoria: categoria,
+                          usuarioCriador: 'usuario1' //appUser.id,
+                          );
 
                       var result = await listaServices.salvarLista(novaLista);
 
@@ -292,9 +298,9 @@ class TelaPrincipalPage extends StatelessWidget {
     ListaDeCompras lista,
     ListaDeComprasServices listaDeComprasServices,
   ) {
-    final TextEditingController nomeEditController = 
+    final TextEditingController nomeEditController =
         TextEditingController(text: lista.nome);
-    final TextEditingController categoriaEditController = 
+    final TextEditingController categoriaEditController =
         TextEditingController(text: lista.categoria);
 
     showDialog(
@@ -362,8 +368,8 @@ class TelaPrincipalPage extends StatelessWidget {
     );
   }
 
-  void _compartilharLista(BuildContext context, ListaDeCompras lista, 
-    ListaDeComprasServices listaDeComprasServices) {
+  void _compartilharLista(BuildContext context, ListaDeCompras lista,
+      ListaDeComprasServices listaDeComprasServices) {
     final TextEditingController emailController = TextEditingController();
 
     showDialog(
@@ -433,7 +439,8 @@ class TelaPrincipalPage extends StatelessWidget {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Excluir Lista'),
-          content: Text('Tem certeza que deseja excluir a lista "${lista.nome}"?'),
+          content:
+              Text('Tem certeza que deseja excluir a lista "${lista.nome}"?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -441,7 +448,8 @@ class TelaPrincipalPage extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () async {
-                var result = await listaDeComprasServices.excluirLista(lista.id);
+                var result =
+                    await listaDeComprasServices.excluirLista(lista.id);
 
                 Navigator.of(context).pop();
 
