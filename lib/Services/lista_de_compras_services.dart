@@ -11,8 +11,10 @@ import '../Models/item.dart';
 class ListaDeComprasServices extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  CollectionReference get _collectionRefLista => _firestore.collection("listas");
-  CollectionReference get _collectionRefListasPorUsuario => _firestore.collection("listasPorUsuario");
+  CollectionReference get _collectionRefLista =>
+      _firestore.collection("listas");
+  CollectionReference get _collectionRefListasPorUsuario =>
+      _firestore.collection("listasPorUsuario");
   final UserServices _userServices = UserServices();
 
   Future<Map<String, dynamic>> salvarLista(ListaDeCompras lista) async {
@@ -38,12 +40,11 @@ class ListaDeComprasServices extends ChangeNotifier {
     DocumentReference docRef = await _collectionRefLista.add(lista.toJson());
 
     var listaPorUsuario = ListasPorUsuarios(
-      listaId: lista.id,
-      usuarioId: lista.usuarioCriador,
-      podeVisualizar: true,
-      podeEditar: true,
-      podeExcluir: true
-    );
+        listaId: lista.id,
+        usuarioId: lista.usuarioCriador,
+        podeVisualizar: true,
+        podeEditar: true,
+        podeExcluir: true);
 
     await _collectionRefListasPorUsuario.add(listaPorUsuario.toJson());
 
@@ -79,18 +80,17 @@ class ListaDeComprasServices extends ChangeNotifier {
     }
   }
 
-  Future<Map<String, dynamic>> compartilharLista(String? listaId, String email) async {
+  Future<Map<String, dynamic>> compartilharLista(
+      String? listaId, String email) async {
     try {
       //var idUsuario = _userServices.retornarIdUsuarioPeloEmail(email);
       var idUsuario = '123';
 
       var listaPorUsuario = ListasPorUsuarios(
-        listaId: listaId,
-        usuarioId: idUsuario,
-        podeVisualizar: true
-      );
+          listaId: listaId, usuarioId: idUsuario, podeVisualizar: true);
 
-      DocumentReference docRef = await _collectionRefListasPorUsuario.add(listaPorUsuario.toJson());
+      DocumentReference docRef =
+          await _collectionRefListasPorUsuario.add(listaPorUsuario.toJson());
       await docRef.update({'id': docRef.id});
 
       return {
@@ -102,8 +102,7 @@ class ListaDeComprasServices extends ChangeNotifier {
     }
   }
 
-  
-  CollectionReference<Item> _itemsRef(String listId) => _collectionRef
+  CollectionReference<Item> _itemsRef(String listId) => _collectionRefLista
       .doc(listId)
       .collection('itens') // Nome da subcoleção de itens
       .withConverter<Item>(
@@ -129,5 +128,4 @@ class ListaDeComprasServices extends ChangeNotifier {
       rethrow;
     }
   }
-
 }
