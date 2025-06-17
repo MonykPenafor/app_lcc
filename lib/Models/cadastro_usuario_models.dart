@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class UsuarioModel {
   String id;
   String nome;
@@ -10,18 +12,18 @@ class UsuarioModel {
       required this.email,
       required this.senha});
 
-  UsuarioModel.fromMap(Map<String, dynamic> map)
-      : id = map["id"],
-        nome = map["nome"],
-        email = map["email"],
-        senha = map["senha"];
-  
-  Map<String, dynamic> toMap(){
+  Map<String, dynamic> toMap() {
     return {
       "id": id,
       "nome": nome,
       "email": email,
       "senha": senha,
     };
+  }
+
+  UsuarioModel.fromJson(DocumentSnapshot doc) {
+    id = doc.id;
+    nome = doc.get('nome');
+    email = doc.get('email');
   }
 }
