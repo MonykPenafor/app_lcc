@@ -1,3 +1,4 @@
+import 'package:app_lcc/Pages/cadastro_usuario_page.dart';
 import 'package:app_lcc/Pages/perfil_usuario_page.dart';
 import 'package:flutter/material.dart';
 
@@ -19,6 +20,6 @@ class MyApp extends StatelessWidget {
                 seedColor: const Color.fromARGB(255, 215, 253, 1)),
             useMaterial3: true,
             visualDensity: VisualDensity.adaptivePlatformDensity),
-        home: PerfilUsuario());
+        home: const CadastroUsuarioPage());
   }
 }
