@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class UsuarioModel {
   String id;
   String nome;
@@ -21,9 +19,9 @@ class UsuarioModel {
     };
   }
 
-  UsuarioModel.fromJson(DocumentSnapshot doc) {
-    id = doc.id;
-    nome = doc.get('nome');
-    email = doc.get('email');
-  }
+  UsuarioModel.fromMap(Map<String, dynamic> map)
+      : id = map["id"],
+        nome = map["nome"],
+        email = map["email"],
+        senha = map["senha"];
 }
