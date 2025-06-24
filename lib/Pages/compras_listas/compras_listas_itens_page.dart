@@ -8,8 +8,7 @@ class ComprasListasItensPage extends StatefulWidget {
   final String id;
   final String nome;
 
-  const ComprasListasItensPage({Key? key, required this.id, required this.nome})
-      : super(key: key);
+  const ComprasListasItensPage({super.key, required this.id, required this.nome});
 
   @override
   _ComprasListasItensPageState createState() => _ComprasListasItensPageState();
@@ -130,7 +129,7 @@ class _ComprasListasItensPageState extends State<ComprasListasItensPage> {
         stream: _listaService.getItemsStream(widget.id),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
             return Center(

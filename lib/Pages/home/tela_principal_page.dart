@@ -54,7 +54,7 @@ class TelaPrincipalPage extends StatelessWidget {
                         itemCount: snapshot.data!.docs.length,
                         itemBuilder: (context, index) {
                           DocumentSnapshot ds = snapshot.data!.docs[index];
-                          ListaDeCompras _lista =
+                          ListaDeCompras lista =
                               ListaDeCompras.fromDocument(ds);
 
                           return GestureDetector(
@@ -68,8 +68,8 @@ class TelaPrincipalPage extends StatelessWidget {
                                     MaterialPageRoute(
                                       builder: (context) =>
                                           ComprasListasItensPage(
-                                        id: _lista.id!, 
-                                        nome: _lista.nome ?? 'Sem nome',
+                                        id: lista.id!, 
+                                        nome: lista.nome ?? 'Sem nome',
                                       ),
                                     ),
                                   );
@@ -105,14 +105,14 @@ class TelaPrincipalPage extends StatelessWidget {
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  _lista.nome!,
+                                                  lista.nome!,
                                                   style: const TextStyle(
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 16.0,
                                                   ),
                                                 ),
                                                 Text(
-                                                  _lista.categoria!,
+                                                  lista.categoria!,
                                                   style: const TextStyle(
                                                       fontSize: 14.0),
                                                 ),
@@ -124,7 +124,7 @@ class TelaPrincipalPage extends StatelessWidget {
                                               _handleMenuAction(
                                                   context,
                                                   value,
-                                                  _lista,
+                                                  lista,
                                                   userServices,
                                                   listaDeComprasServices);
                                             },
