@@ -44,7 +44,7 @@ class Item {
       'itemNome': itemNome,
       'quantidade': quantidade,
       if (obs != null && obs!.isNotEmpty)
-        'notes': obs, // Só inclui se não for nulo/
+        'obs': obs, // Só inclui se não for nulo/
       'isBought': isBought,
       'listaId': listaId,
       'createdAt': createdAt,

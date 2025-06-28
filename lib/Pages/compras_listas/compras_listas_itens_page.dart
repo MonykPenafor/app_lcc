@@ -23,6 +23,119 @@ class _ComprasListasItensPageState extends State<ComprasListasItensPage> {
   final _formKey = GlobalKey<FormState>();
 
   @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.nome),
+      ),
+      body: StreamBuilder<List<Item>>(
+        stream: _listaService.getItemsStream(widget.id),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(
+                child: Text('Erro ao carregar itens: ${snapshot.error}'));
+          }
+          final itens = snapshot.data ??
+              []; // Garante uma lista vazia se não houver dados
+
+          // calcular progresso
+          int totalItens = itens.length;
+          int boughtItens = itens.where((item) => item.isBought).length;
+          double progress = totalItens > 0 ? boughtItens / totalItens : 0.0;
+          return Column(
+            children: [
+              // Barra de Progresso (só mostra se houver itens)
+              if (totalItens > 0)
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      LinearProgressIndicator(
+                        value: progress,
+                        backgroundColor: Colors.grey[300],
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                            Theme.of(context).primaryColor),
+                        minHeight: 8,
+                      ),
+                      const SizedBox(
+                        height: 4,
+                      ),
+                      Text(
+                        "${(progress * 100).toStringAsFixed(0)}% Concluído ($boughtItens de $totalItens itens)",
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+              // Mensagem se a lista estiver vazia
+              if (itens.isEmpty &&
+                  snapshot.connectionState != ConnectionState.waiting)
+                const Expanded(
+                  child: Center(child: Text('Nenhum item nesta lista ainda')),
+                )
+              // Lista de Itens (ocupa o espaço restante)
+              else
+                Expanded(
+                    child: ListView.builder(
+                        itemCount: itens.length,
+                        itemBuilder: (context, index) {
+                          final item = itens[index];
+                          return ListTile(
+                            leading: Checkbox(
+                                value: item.isBought,
+                                onChanged: (bool? newValue) {
+                                  if (newValue != null) {
+                                    _updateItemStatus(item, newValue);
+                                  }
+                                }),
+                            title: Text(
+                              item.itemNome,
+                              style: TextStyle(
+                                decoration: item.isBought
+                                    ? TextDecoration.lineThrough
+                                    : TextDecoration.none,
+                                color: item.isBought ? Colors.grey : null,
+                              ),
+                            ),
+                            subtitle: Text(
+                              'Qdt:${item.quantidade}${item.obs != null && item.obs!.isNotEmpty ? " - Obs: ${item.obs}" : ""}',
+                              style: TextStyle(
+                                decoration: item.isBought
+                                    ? TextDecoration.lineThrough
+                                    : TextDecoration.none,
+                                color: item.isBought ? Colors.grey : null,
+                              ),
+                            ),
+                            onTap: () {
+                              _updateItemStatus(item, !item.isBought);
+                            },
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete_outlined,
+                                  color: Colors.redAccent),
+                              tooltip: 'Remover Item',
+                              onPressed: () {
+                                _deleteItem(item);
+                              },
+                            ),
+                          );
+                        }))
+            ],
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showAddItemDialog(context),
+        tooltip: 'Adicionar Item',
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  @override
   void dispose() {
     _itemNomeController.dispose();
     _quantidadeController.dispose();
@@ -120,74 +233,6 @@ class _ComprasListasItensPageState extends State<ComprasListasItensPage> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.nome),
-      ),
-      body: StreamBuilder<List<Item>>(
-        stream: _listaService.getItemsStream(widget.id),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(
-                child: Text('Erro ao Carregar itens: ${snapshot.error}'));
-          }
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('Nenhum item nesta lista ainda.'));
-          }
-
-          final itens = snapshot.data!;
-
-          return ListView.builder(
-            itemCount: itens.length,
-            itemBuilder: (context, index) {
-              final item = itens[index];
-              return ListTile(
-                leading: Checkbox(
-                    value: item.isBought,
-                    onChanged: (bool? newValue) {
-                      if (newValue != null) {
-                        _updateItemStatus(item, newValue);
-                      }
-                    }),
-                title: Text(
-                  item.itemNome,
-                  style: TextStyle(
-                    decoration: item.isBought
-                        ? TextDecoration.lineThrough
-                        : TextDecoration.none,
-                    color: item.isBought ? Colors.grey : null,
-                  ),
-                ),
-                subtitle: Text(
-                  'Qdt:${item.quantidade}${item.obs != null && item.obs!.isNotEmpty ? " - Obs: ${item.obs}" : ""}',
-                  style: TextStyle(
-                    decoration: item.isBought
-                        ? TextDecoration.lineThrough
-                        : TextDecoration.none,
-                    color: item.isBought ? Colors.grey : null,
-                  ),
-                ),
-                onTap: () {
-                  _updateItemStatus(item, !item.isBought);
-                },
-              );
-            },
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddItemDialog(context),
-        tooltip: 'Adicionar Item',
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
-
   Future<void> _updateItemStatus(Item item, bool newStatus) async {
     if (item.idItem == null) {
       print("Erro> ID do item é nulo.");
@@ -206,6 +251,50 @@ class _ComprasListasItensPageState extends State<ComprasListasItensPage> {
             content: Text("Erro ao atualizar status: $e"),
             backgroundColor: Colors.red),
       );
+    }
+  }
+
+  Future<void> _deleteItem(Item item) async {
+    if (item.idItem == null) {
+      print("Erro: ID do item é nulo.");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text("Erro ao remover item: ID não encontrado."),
+            backgroundColor: Colors.red),
+      );
+      return;
+    }
+    final confirm = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text('Remover "${item.itemNome}" da lista'),
+              actions: [
+                TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text('Cancelar')),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text('Remover',
+                      style: TextStyle(color: Colors.red)),
+                ),
+              ],
+            ));
+
+    if (confirm == true) {
+      try {
+        await _listaService.deleteItem(widget.id, item.idItem!);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('"${item.itemNome}" removido.'),
+              duration: const Duration(seconds: 2)),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text("Erro ao remover item: $e"),
+              backgroundColor: Colors.red),
+        );
+      }
     }
   }
 }

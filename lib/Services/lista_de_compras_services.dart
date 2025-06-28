@@ -109,4 +109,14 @@ class ListaDeComprasServices extends ChangeNotifier {
       rethrow;
     }
   }
+
+  Future<void> deleteItem(String id, String idItem) async {
+    try {
+      await _itemsRef(id).doc(idItem).delete();
+      print('Item $id removido com sucesso da lista $id');
+    } catch (e) {
+      print('Erro ao remover item $idItem da lista $id: $e');
+      rethrow;
+    }
+  }
 }
