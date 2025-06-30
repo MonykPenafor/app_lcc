@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'Pages/login_page.dart';
 import 'Pages/home/main_navigation_page.dart';
 import 'Pages/home/tela_principal_page.dart';
 
@@ -56,6 +57,7 @@ class MyApp extends StatelessWidget {
         routes: {
             // '/login':(context) => LoginPage(),
             '/cadastroUsuario': (context) => const CadastroUsuarioPage(),
+            '/loginPage': (context) => const LoginPage(),
             '/perfilUsuario': (context) => PerfilUsuario(),
             '/mainNav' :(context) => const MainNavigationPage(),
             '/main':(context) => TelaPrincipalPage(),
