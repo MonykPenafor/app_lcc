@@ -1,4 +1,5 @@
 import 'package:app_lcc/Models/cadastro_usuario_models.dart';
+import 'package:app_lcc/Pages/login_page.dart';
 import 'package:app_lcc/Services/autenticacao_servico.dart';
 import 'package:flutter/material.dart';
 
@@ -140,7 +141,10 @@ class _CadastroUsuarioPageState extends State<CadastroUsuarioPage> {
                   const SizedBox(height: 16),
                   TextButton(
                     onPressed: () {
-                      print("foi pro login");
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => LoginPage()),
+                      );
                     },
                     child: const Text(
                       "Já tem uma conta? Entre!",
