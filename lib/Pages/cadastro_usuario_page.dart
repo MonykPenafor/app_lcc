@@ -77,10 +77,11 @@ class _CadastroUsuarioPageState extends State<CadastroUsuarioPage> {
                   },
                 ),
                 TextFormField(
-                    controller: _confirmaSenhaController,
-                    decoration: const InputDecoration(
-                        label: Text("Confirme a Senha:")),
-                        validator: (String? value) {
+                  controller: _confirmaSenhaController,
+                  decoration:
+                      const InputDecoration(label: Text("Confirme a Senha:")),
+                  obscureText: true,
+                  validator: (String? value) {
                     if (value == null) {
                       return "A Confirmção de senha não pode estar vazia";
                     }
@@ -88,7 +89,8 @@ class _CadastroUsuarioPageState extends State<CadastroUsuarioPage> {
                       return "A Confirmção de senha é muito curta";
                     }
                     return null;
-                  },),
+                  },
+                ),
                 const SizedBox(
                   height: 16,
                 ),
