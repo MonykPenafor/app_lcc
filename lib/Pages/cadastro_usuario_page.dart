@@ -26,7 +26,7 @@ class _CadastroUsuarioPageState extends State<CadastroUsuarioPage> {
       appBar: AppBar(
         title: const Text("Cadastro de Usuário"),
         centerTitle: true,
-        backgroundColor: const Color.fromARGB(255, 28, 58, 226),
+        backgroundColor: const Color.fromARGB(255, 168, 217, 255),
         elevation: 4,
       ),
       body: Center(
@@ -45,7 +45,7 @@ class _CadastroUsuarioPageState extends State<CadastroUsuarioPage> {
                   Text(
                     "Cadastre-se agora",
                     style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                          color: const Color.fromARGB(255, 45, 106, 236),
+                          color: const Color.fromARGB(234, 111, 109, 228),
                           fontWeight: FontWeight.bold,
                         ),
                   ),
@@ -123,7 +123,7 @@ class _CadastroUsuarioPageState extends State<CadastroUsuarioPage> {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 224, 20, 214),
+                      backgroundColor: const Color.fromARGB(255, 168, 217, 255),
                       padding: const EdgeInsets.symmetric(
                           horizontal: 40, vertical: 12),
                       shape: RoundedRectangleBorder(
@@ -145,7 +145,7 @@ class _CadastroUsuarioPageState extends State<CadastroUsuarioPage> {
                     child: const Text(
                       "Já tem uma conta? Entre!",
                       style: TextStyle(
-                          color: Color.fromARGB(234, 240, 45, 240),
+                          color: Color.fromARGB(234, 111, 109, 228),
                           fontWeight: FontWeight.w600),
                     ),
                   ),
@@ -170,7 +170,7 @@ class _CadastroUsuarioPageState extends State<CadastroUsuarioPage> {
       controller: controller,
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(color: Color.fromARGB(255, 226, 34, 201)),
+        labelStyle: const TextStyle(color: Color.fromARGB(234, 111, 109, 228)),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(30),
         ),
