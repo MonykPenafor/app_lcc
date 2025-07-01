@@ -53,9 +53,8 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 175, 46, 46)),
           useMaterial3: true,
         ),
-        initialRoute: '/mainNav',
+        initialRoute: '/loginPage',
         routes: {
-            // '/login':(context) => LoginPage(),
             '/cadastroUsuario': (context) => const CadastroUsuarioPage(),
             '/loginPage': (context) => const LoginPage(),
             '/perfilUsuario': (context) => PerfilUsuario(),

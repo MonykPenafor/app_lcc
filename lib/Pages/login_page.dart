@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 
 import 'cadastro_usuario_page.dart';
+import 'home/main_navigation_page.dart';
 import 'home/tela_principal_page.dart';
  
 
@@ -29,7 +30,7 @@ class _LoginPageState extends State<LoginPage> {
       );
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => TelaPrincipalPage()),
+        MaterialPageRoute(builder: (_) => MainNavigationPage()),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

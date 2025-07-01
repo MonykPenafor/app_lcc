@@ -121,5 +121,3 @@ class _CadastroUsuarioPageState extends State<CadastroUsuarioPage> {
     );
   }
 }
-
-extension on GlobalKey<FormState> {}

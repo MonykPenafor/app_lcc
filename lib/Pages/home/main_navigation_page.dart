@@ -1,6 +1,7 @@
 import 'package:app_lcc/Pages/cadastro_usuario_page.dart';
 import 'package:app_lcc/Pages/perfil_usuario_page.dart';
 import 'package:flutter/material.dart';
+import '../login_page.dart';
 import 'tela_principal_page.dart';
 
 class MainNavigationPage extends StatefulWidget {
@@ -19,9 +20,8 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       body: IndexedStack(
         index: _selectedIndex,
         children: [
-          const CadastroUsuarioPage(),
           PerfilUsuario(),
-          TelaPrincipalPage(),
+          TelaPrincipalPage()
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -34,17 +34,13 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
         },
         destinations: const [
           NavigationDestination(
-            icon: Icon(Icons.wallet_giftcard),
-            label: 'Cadastro',
-          ),
-          NavigationDestination(
             icon: Icon(Icons.person),
             label: 'Perfil',
           ),
           NavigationDestination(
             icon: Icon(Icons.list_alt_rounded),
             label: 'Listas de Compra',
-          ),
+          )
         ],
       ),
     );
