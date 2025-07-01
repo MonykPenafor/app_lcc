@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class AutenticacaoServico {
   FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+  User? user = FirebaseAuth.instance.currentUser;
 
   cadastrarUsuario({
     required String nome,
