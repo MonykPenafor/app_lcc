@@ -3,9 +3,8 @@ import 'package:app_lcc/Models/lista_de_compras.dart';
 import 'package:app_lcc/Models/listas_por_usuarios.dart';
 import 'package:app_lcc/Services/user_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
-
-import '../Models/app_user.dart';
 import '../Models/item.dart';
 
 class ListaDeComprasServices extends ChangeNotifier {
@@ -39,16 +38,18 @@ class ListaDeComprasServices extends ChangeNotifier {
   Future<String> criarLista(ListaDeCompras lista) async {
     DocumentReference docRef = await _collectionRefLista.add(lista.toJson());
 
+    await docRef.update({'id': docRef.id});
+
     var listaPorUsuario = ListasPorUsuarios(
-        listaId: lista.id,
+        listaId: docRef.id,
         usuarioId: lista.usuarioCriador,
         podeVisualizar: true,
         podeEditar: true,
         podeExcluir: true);
 
-    await _collectionRefListasPorUsuario.add(listaPorUsuario.toJson());
+    DocumentReference docRef2 = await _collectionRefListasPorUsuario.add(listaPorUsuario.toJson());
+    await docRef2.update({'id': docRef2.id});
 
-    await docRef.update({'id': docRef.id});
     return "lista criada";
   }
 
@@ -59,11 +60,10 @@ class ListaDeComprasServices extends ChangeNotifier {
     return "Event updated successfully";
   }
 
-  Stream<QuerySnapshot> buscarListas(AppUser? user) {
-    String? userId = user!.id;
+  Stream<QuerySnapshot> buscarListas(User? user) {
+    String? userId = user!.uid;
     return _collectionRefLista
         .where('usuarioCriador', isEqualTo: userId)
-        .orderBy('nome')
         .snapshots();
   }
 
