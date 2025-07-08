@@ -2,6 +2,7 @@ import 'package:app_lcc/Models/app_user.dart';
 import 'package:app_lcc/Models/lista_de_compras.dart';
 import 'package:app_lcc/Services/lista_de_compras_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -17,6 +18,8 @@ class TelaPrincipalPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    User? user = FirebaseAuth.instance.currentUser;
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -35,7 +38,7 @@ class TelaPrincipalPage extends StatelessWidget {
                     (context, userServices, listaDeComprasServices, child) {
                   return StreamBuilder(
                     stream: listaDeComprasServices
-                        .buscarListas(userServices.appUser),
+                        .buscarListas(user),
                     builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
@@ -246,7 +249,7 @@ class TelaPrincipalPage extends StatelessWidget {
                       var novaLista = ListaDeCompras(
                           nome: nome,
                           categoria: categoria,
-                          usuarioCriador: 'usuario1' //appUser.id,
+                          usuarioCriador: user!.uid,
                           );
 
                       var result = await listaServices.salvarLista(novaLista);

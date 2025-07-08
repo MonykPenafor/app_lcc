@@ -57,7 +57,7 @@ class MyApp extends StatelessWidget {
         routes: {
             '/cadastroUsuario': (context) => const CadastroUsuarioPage(),
             '/loginPage': (context) => const LoginPage(),
-            '/perfilUsuario': (context) => PerfilUsuario(),
+            '/perfilUsuario': (context) => const PerfilUsuario(),
             '/mainNav' :(context) => const MainNavigationPage(),
             '/main':(context) => TelaPrincipalPage(),
         },     

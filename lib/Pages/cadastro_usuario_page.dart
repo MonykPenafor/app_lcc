@@ -143,7 +143,7 @@ class _CadastroUsuarioPageState extends State<CadastroUsuarioPage> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => LoginPage()),
+                        MaterialPageRoute(builder: (_) => const LoginPage()),
                       );
                     },
                     child: const Text(
