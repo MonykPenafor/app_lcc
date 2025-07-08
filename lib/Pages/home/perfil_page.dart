@@ -2,9 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../services/auth_service.dart';
-import '../services/firestore_service.dart';
-import 'Pages/login_page.dart';
+import '/services/auth_service.dart';
+import '/services/firestore_service.dart';
+import '/Pages/login_page.dart';
 
 class PerfilPage extends StatefulWidget {
   @override
