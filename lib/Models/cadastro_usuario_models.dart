@@ -10,13 +10,7 @@ class UsuarioModel {
       required this.email,
       required this.senha});
 
-  UsuarioModel.fromMap(Map<String, dynamic> map)
-      : id = map["id"],
-        nome = map["nome"],
-        email = map["email"],
-        senha = map["senha"];
-  
-  Map<String, dynamic> toMap(){
+  Map<String, dynamic> toMap() {
     return {
       "id": id,
       "nome": nome,
@@ -24,4 +18,10 @@ class UsuarioModel {
       "senha": senha,
     };
   }
+
+  UsuarioModel.fromMap(Map<String, dynamic> map)
+      : id = map["id"],
+        nome = map["nome"],
+        email = map["email"],
+        senha = map["senha"];
 }

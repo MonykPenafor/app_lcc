@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ListaDeCompras {
@@ -7,15 +6,14 @@ class ListaDeCompras {
   String? categoria;
   String? usuarioCriador;
 
-  ListaDeCompras(
-    {
+  ListaDeCompras({
     this.id,
     this.nome,
     this.categoria,
     this.usuarioCriador,
   });
 
- Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJson() {
     return {
       'id': id,
       'nome': nome,
@@ -33,11 +31,10 @@ class ListaDeCompras {
     );
   }
 
-  ListaDeCompras.fromDocument(DocumentSnapshot doc){
+  ListaDeCompras.fromDocument(DocumentSnapshot doc) {
     id = doc.id;
     nome = doc.get('nome');
     categoria = doc.get('categoria');
     usuarioCriador = doc.get('usuarioCriador');
   }
-
 }
