@@ -1,10 +1,10 @@
+import 'package:app_lcc/Pages/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-
-
+import 'package:flutter/foundation.dart'; // Para usar kIsWeb
 
 class PerfilUsuario extends StatefulWidget {
   const PerfilUsuario({super.key});
@@ -24,13 +24,12 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
 
   @override
   void initState() {
-  super.initState();
-  user = _auth.currentUser;
-  nomeController = TextEditingController(text: user?.displayName ?? "");
-  emailController = TextEditingController(text: user?.email ?? "");
-  _urlImagemPerfil = user?.photoURL;
-}
-
+    super.initState();
+    user = _auth.currentUser;
+    nomeController = TextEditingController(text: user?.displayName ?? "");
+    emailController = TextEditingController(text: user?.email ?? "");
+    _urlImagemPerfil = user?.photoURL;
+  }
 
   @override
   void dispose() {
@@ -48,6 +47,14 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
         emailController.text = user?.email ?? "";
       }
     });
+  }
+
+  Future<void> logout() async {
+    await _auth.signOut();
+    // Depois de deslogar, navegue para tela de login
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+    );
   }
 
   Future<void> salvarAlteracoes() async {
@@ -79,42 +86,60 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
   }
 
   Future<void> selecionarImagem() async {
-  final XFile? imagemSelecionada = await _picker.pickImage(source: ImageSource.gallery);
+    final XFile? imagemSelecionada =
+        await _picker.pickImage(source: ImageSource.gallery);
 
-  if (imagemSelecionada != null) {
-    final File imagemFile = File(imagemSelecionada.path);
+    if (imagemSelecionada != null) {
+      try {
+        final storageRef = FirebaseStorage.instance
+            .ref()
+            .child('fotos_perfil')
+            .child('${user?.uid}.jpg');
 
-    try {
-      final storageRef = FirebaseStorage.instance
-          .ref()
-          .child('fotos_perfil')
-          .child('${user?.uid}.jpg');
+        String downloadUrl;
 
-      await storageRef.putFile(imagemFile);
+        if (kIsWeb) {
+          final bytes = await imagemSelecionada.readAsBytes();
 
-      final url = await storageRef.getDownloadURL();
+          await storageRef.putData(
+            bytes,
+            SettableMetadata(contentType: 'image/jpeg'),
+          );
 
-      await user?.updatePhotoURL(url);
-      await user?.reload();
-      user = _auth.currentUser;
+          downloadUrl = await storageRef.getDownloadURL();
 
-      setState(() {
-        _imagemPerfil = imagemFile;
-        _urlImagemPerfil = url;
-      });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao enviar imagem: $e')),
-      );
+          setState(() {
+            _imagemPerfil = null; // Web não usa File
+            _urlImagemPerfil = downloadUrl;
+          });
+        } else {
+          final File imagemFile = File(imagemSelecionada.path);
+
+          await storageRef.putFile(imagemFile);
+
+          downloadUrl = await storageRef.getDownloadURL();
+
+          setState(() {
+            _imagemPerfil = imagemFile;
+            _urlImagemPerfil = downloadUrl;
+          });
+        }
+
+        // Atualiza o perfil do usuário com a nova URL da foto
+        await user?.updatePhotoURL(downloadUrl);
+        await user?.reload();
+        user = _auth.currentUser;
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao enviar imagem: $e')),
+        );
+      }
     }
   }
-}
 
-        File? _imagemPerfil;
-      String? _urlImagemPerfil;
-      final ImagePicker _picker = ImagePicker();
-
-  
+  File? _imagemPerfil;
+  String? _urlImagemPerfil;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   Widget build(BuildContext context) {
@@ -138,7 +163,14 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
             icon: Icon(isEditing ? Icons.cancel : Icons.edit),
             tooltip: isEditing ? "Cancelar edição" : "Editar perfil",
             onPressed: toggleEditMode,
-          )
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Sair',
+            onPressed: () async {
+              await logout();
+            },
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -146,29 +178,29 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-                      GestureDetector(
-            onTap: isEditing ? selecionarImagem : null,
-            child: CircleAvatar(
-              radius: 60,
-              backgroundColor: Colors.teal.shade100,
-              backgroundImage: _urlImagemPerfil != null
-                  ? NetworkImage(_urlImagemPerfil!)
-                  : null,
-              child: _urlImagemPerfil == null
-                  ? const Icon(Icons.account_circle, size: 100, color: Colors.teal)
-                  : null,
-            ),
-          ),
-          const SizedBox(height: 12),
-          if (isEditing)
-            TextButton(
-              onPressed: selecionarImagem,
-              child: const Text(
-                'Alterar Foto',
-                style: TextStyle(color: Colors.teal),
+            GestureDetector(
+              onTap: isEditing ? selecionarImagem : null,
+              child: CircleAvatar(
+                radius: 60,
+                backgroundColor: Colors.teal.shade100,
+                backgroundImage: _urlImagemPerfil != null
+                    ? NetworkImage(_urlImagemPerfil!)
+                    : null,
+                child: _urlImagemPerfil == null
+                    ? const Icon(Icons.account_circle,
+                        size: 100, color: Colors.teal)
+                    : null,
               ),
             ),
-
+            const SizedBox(height: 12),
+            if (isEditing)
+              TextButton(
+                onPressed: selecionarImagem,
+                child: const Text(
+                  'Alterar Foto',
+                  style: TextStyle(color: Colors.teal),
+                ),
+              ),
             const SizedBox(height: 24),
             Text(
               'Informações do Usuário',
