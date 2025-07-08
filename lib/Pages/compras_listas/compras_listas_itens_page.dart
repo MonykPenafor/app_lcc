@@ -1,3 +1,4 @@
+import 'package:app_lcc/Components/list_progress_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -49,27 +50,13 @@ class _ComprasListasItensPageState extends State<ComprasListasItensPage> {
             children: [
               // Barra de Progresso (só mostra se houver itens)
               if (totalItens > 0)
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      LinearProgressIndicator(
-                        value: progress,
-                        backgroundColor: Colors.grey[300],
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                            Theme.of(context).primaryColor),
-                        minHeight: 8,
-                      ),
-                      const SizedBox(
-                        height: 4,
-                      ),
-                      Text(
-                        "${(progress * 100).toStringAsFixed(0)}% Concluído ($boughtItens de $totalItens itens)",
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
-                  ),
+                ListProgressBar(
+                  totalItens: totalItens,
+                  boughtItens: boughtItens,
+                  progressColor: Colors.green,
+                  backgroundColor: Colors.grey[300],
+                  padding: const EdgeInsets.all(8.0),
+                  textStyle: Theme.of(context).textTheme.bodyMedium,
                 ),
               // Mensagem se a lista estiver vazia
               if (itens.isEmpty &&
@@ -77,7 +64,6 @@ class _ComprasListasItensPageState extends State<ComprasListasItensPage> {
                 const Expanded(
                   child: Center(child: Text('Nenhum item nesta lista ainda')),
                 )
-              // Lista de Itens (ocupa o espaço restante)
               else
                 Expanded(
                     child: ListView.builder(
