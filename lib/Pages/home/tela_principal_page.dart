@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../Components/custom_snackbar.dart';
-import '../../Services/user_services.dart';
 import '../compras_listas/compras_listas_itens_page.dart';
 
 class TelaPrincipalPage extends StatelessWidget {
@@ -33,9 +32,9 @@ class TelaPrincipalPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: Consumer2<UserServices, ListaDeComprasServices>(
+              child: Consumer<ListaDeComprasServices>(
                 builder:
-                    (context, userServices, listaDeComprasServices, child) {
+                    (context, listaDeComprasServices, child) {
                   return StreamBuilder(
                     stream: listaDeComprasServices
                         .buscarListas(user),
@@ -128,7 +127,6 @@ class TelaPrincipalPage extends StatelessWidget {
                                                   context,
                                                   value,
                                                   lista,
-                                                  userServices,
                                                   listaDeComprasServices);
                                             },
                                             itemBuilder:
@@ -190,11 +188,8 @@ class TelaPrincipalPage extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          final userServices =
-              Provider.of<UserServices>(context, listen: false);
           final listaServices =
               Provider.of<ListaDeComprasServices>(context, listen: false);
-          final AppUser? appUser = userServices.appUser;
 
           showDialog(
             context: context,
@@ -237,7 +232,7 @@ class TelaPrincipalPage extends StatelessWidget {
 
                       if (nome.isEmpty ||
                           categoria.isEmpty ||
-                          appUser == null) {
+                          user == null) {
                         CustomSnackBar.show(
                           context,
                           'Preencha todos os campos!',
@@ -249,7 +244,7 @@ class TelaPrincipalPage extends StatelessWidget {
                       var novaLista = ListaDeCompras(
                           nome: nome,
                           categoria: categoria,
-                          usuarioCriador: user!.uid,
+                          usuarioCriador: user.uid,
                           );
 
                       var result = await listaServices.salvarLista(novaLista);
@@ -280,7 +275,6 @@ class TelaPrincipalPage extends StatelessWidget {
     BuildContext context,
     String action,
     ListaDeCompras lista,
-    UserServices userServices,
     ListaDeComprasServices listaDeComprasServices,
   ) {
     switch (action) {

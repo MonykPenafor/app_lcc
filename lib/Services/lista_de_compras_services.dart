@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:app_lcc/Models/lista_de_compras.dart';
 import 'package:app_lcc/Models/listas_por_usuarios.dart';
-import 'package:app_lcc/Services/user_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -14,7 +13,6 @@ class ListaDeComprasServices extends ChangeNotifier {
       _firestore.collection("listas");
   CollectionReference get _collectionRefListasPorUsuario =>
       _firestore.collection("listasPorUsuario");
-  final UserServices _userServices = UserServices();
 
   Future<Map<String, dynamic>> salvarLista(ListaDeCompras lista) async {
     dynamic resultado;

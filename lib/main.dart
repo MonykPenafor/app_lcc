@@ -10,7 +10,6 @@ import 'Pages/home/main_navigation_page.dart';
 import 'Pages/home/tela_principal_page.dart';
 
 import 'Services/lista_de_compras_services.dart';
-import 'Services/user_services.dart';
 
 
 void main() async {
@@ -44,8 +43,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => ListaDeComprasServices(), lazy: false,),
-        ChangeNotifierProvider(create: (_) => UserServices(), lazy: false,)],
+        ChangeNotifierProvider(create: (_) => ListaDeComprasServices(), lazy: false,)],
       
       child: MaterialApp(
         title: 'APP MARIMO',
