@@ -4,11 +4,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'cadastro_usuario_page.dart';
 import 'home/main_navigation_page.dart';
-import 'home/tela_principal_page.dart';
  
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+  const LoginPage({super.key});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -30,7 +29,7 @@ class _LoginPageState extends State<LoginPage> {
       );
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => MainNavigationPage()),
+        MaterialPageRoute(builder: (_) => const MainNavigationPage()),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -44,14 +43,14 @@ class _LoginPageState extends State<LoginPage> {
   void _recuperarSenha() {
     if (_emailController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Informe o e-mail para recuperar a senha.')),
+        const SnackBar(content: Text('Informe o e-mail para recuperar a senha.')),
       );
       return;
     }
 
     _auth.sendPasswordResetEmail(email: _emailController.text.trim()).then((_) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('E-mail de recuperação enviado.')),
+        const SnackBar(content: Text('E-mail de recuperação enviado.')),
       );
     }).catchError((e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -80,7 +79,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(height: 20),
             _loading
-                ? CircularProgressIndicator()
+                ? const CircularProgressIndicator()
                 : ElevatedButton(
                     onPressed: _login,
                     child: const Text('Login'),
@@ -93,7 +92,7 @@ class _LoginPageState extends State<LoginPage> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => CadastroUsuarioPage()),
+                  MaterialPageRoute(builder: (_) => const CadastroUsuarioPage()),
                 );
               },
               child: const Text('Ainda não tem uma conta? Cadastre-se'),

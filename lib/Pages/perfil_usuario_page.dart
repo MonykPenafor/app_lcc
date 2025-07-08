@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+
+
 
 class PerfilUsuario extends StatefulWidget {
   const PerfilUsuario({super.key});
@@ -19,13 +24,13 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
 
   @override
   void initState() {
-    super.initState();
+  super.initState();
+  user = _auth.currentUser;
+  nomeController = TextEditingController(text: user?.displayName ?? "");
+  emailController = TextEditingController(text: user?.email ?? "");
+  _urlImagemPerfil = user?.photoURL;
+}
 
-    user = _auth.currentUser;
-
-    nomeController = TextEditingController(text: user?.displayName ?? "");
-    emailController = TextEditingController(text: user?.email ?? "");
-  }
 
   @override
   void dispose() {
@@ -73,6 +78,44 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
     }
   }
 
+  Future<void> selecionarImagem() async {
+  final XFile? imagemSelecionada = await _picker.pickImage(source: ImageSource.gallery);
+
+  if (imagemSelecionada != null) {
+    final File imagemFile = File(imagemSelecionada.path);
+
+    try {
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('fotos_perfil')
+          .child('${user?.uid}.jpg');
+
+      await storageRef.putFile(imagemFile);
+
+      final url = await storageRef.getDownloadURL();
+
+      await user?.updatePhotoURL(url);
+      await user?.reload();
+      user = _auth.currentUser;
+
+      setState(() {
+        _imagemPerfil = imagemFile;
+        _urlImagemPerfil = url;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao enviar imagem: $e')),
+      );
+    }
+  }
+}
+
+        File? _imagemPerfil;
+      String? _urlImagemPerfil;
+      final ImagePicker _picker = ImagePicker();
+
+  
+
   @override
   Widget build(BuildContext context) {
     if (user == null) {
@@ -103,11 +146,29 @@ class _PerfilUsuarioState extends State<PerfilUsuario> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.account_circle,
-              color: Colors.teal,
-              size: 100,
+                      GestureDetector(
+            onTap: isEditing ? selecionarImagem : null,
+            child: CircleAvatar(
+              radius: 60,
+              backgroundColor: Colors.teal.shade100,
+              backgroundImage: _urlImagemPerfil != null
+                  ? NetworkImage(_urlImagemPerfil!)
+                  : null,
+              child: _urlImagemPerfil == null
+                  ? const Icon(Icons.account_circle, size: 100, color: Colors.teal)
+                  : null,
             ),
+          ),
+          const SizedBox(height: 12),
+          if (isEditing)
+            TextButton(
+              onPressed: selecionarImagem,
+              child: const Text(
+                'Alterar Foto',
+                style: TextStyle(color: Colors.teal),
+              ),
+            ),
+
             const SizedBox(height: 24),
             Text(
               'Informações do Usuário',

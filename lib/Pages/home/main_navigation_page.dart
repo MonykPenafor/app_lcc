@@ -20,7 +20,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       body: IndexedStack(
         index: _selectedIndex,
         children: [
-          PerfilUsuario(),
+          const PerfilUsuario(),
           TelaPrincipalPage()
         ],
       ),
