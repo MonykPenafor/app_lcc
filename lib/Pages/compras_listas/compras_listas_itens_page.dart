@@ -65,6 +65,13 @@ class _ComprasListasItensPageState extends State<ComprasListasItensPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.nome),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.group),
+            tooltip: 'Ver usuários com acesso',
+            onPressed: () => _mostrarUsuariosComAcesso(context),
+          ),
+        ],
       ),
       body: StreamBuilder<List<Item>>(
         stream: _listaService.getItemsStream(widget.id),
@@ -176,7 +183,7 @@ class _ComprasListasItensPageState extends State<ComprasListasItensPage> {
           : null,
     );
   }
-  
+
   @override
   void dispose() {
     _itemNomeController.dispose();
@@ -339,4 +346,85 @@ class _ComprasListasItensPageState extends State<ComprasListasItensPage> {
       }
     }
   }
+
+  Future<void> _mostrarUsuariosComAcesso(BuildContext context) async {
+  final listaDoc = await FirebaseFirestore.instance
+      .collection('listas')
+      .doc(widget.id)
+      .get();
+
+  final acessos = listaDoc.data()?['acessos'] as Map<String, dynamic>?;
+
+  if (acessos == null || acessos.isEmpty) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Usuários com acesso'),
+        content: const Text('Nenhum usuário tem acesso a esta lista.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Fechar'),
+          ),
+        ],
+      ),
+    );
+    return;
+  }
+
+  // Carregar dados de usuários
+  List<Widget> listaUsuarios = [];
+
+  for (final entry in acessos.entries) {
+    final userId = entry.key;
+    final permissoes = entry.value as Map<String, dynamic>;
+
+    final userDoc = await FirebaseFirestore.instance
+        .collection('usuarios')
+        .doc(userId)
+        .get();
+
+    final nome = userDoc.data()?['nome'] ?? 'Usuário desconhecido';
+    final email = userDoc.data()?['email'] ?? '';
+
+    String permissoesStr = 'Convidado'; // valor padrão
+
+    if (permissoes['podeExcluir'] == true) {
+      permissoesStr = 'Administrador';
+    } else if (permissoes['podeEditar'] == true) {
+      permissoesStr = 'Participante';
+    } else if (permissoes['podeVisualizar'] == true) {
+      permissoesStr = 'Convidado';
+    }
+
+
+    listaUsuarios.add(
+      ListTile(
+        leading: const Icon(Icons.person),
+        title: Text(nome),
+        subtitle: Text('$email\nPermissão: $permissoesStr'),
+        isThreeLine: true,
+      ),
+    );
+  }
+
+  showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: const Text('Usuários com acesso'),
+      content: SizedBox(
+        width: double.maxFinite,
+        height: 400,
+        child: ListView(children: listaUsuarios),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Fechar'),
+        ),
+      ],
+    ),
+  );
+}
+
 }
