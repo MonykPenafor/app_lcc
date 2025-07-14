@@ -49,132 +49,119 @@ class TelaPrincipalPage extends StatelessWidget {
                         );
                       }
 
-                      return ListView.builder(
-                        itemCount: snapshot.data!.docs.length,
-                        itemBuilder: (context, index) {
-                          DocumentSnapshot ds = snapshot.data!.docs[index];
-                          ListaDeCompras lista =
-                              ListaDeCompras.fromDocument(ds);
+                      final userId = Provider.of<ListaDeComprasServices>(context, listen: false).user?.uid;
 
-                          return GestureDetector(
-                            child: Container(
-                              margin: const EdgeInsets.only(bottom: 5),
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(8.0),
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          ComprasListasItensPage(
-                                        id: lista.id!,
-                                        nome: lista.nome ?? 'Sem nome',
-                                      ),
-                                    ),
-                                  );
-                                },
-                                child: Ink(
-                                  decoration: BoxDecoration(
-                                    color: const Color.fromARGB(
-                                        255, 168, 217, 255),
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: const Color.fromARGB(
-                                                255, 161, 194, 255)
-                                            .withOpacity(0.2),
-                                        blurRadius: 4,
-                                        spreadRadius: 1,
-                                      ),
-                                    ],
-                                  ),
-                                  child: Card(
-                                    elevation: 0,
-                                    color: Colors.transparent,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8.0),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(16.0),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  lista.nome!,
-                                                  style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 16.0,
-                                                  ),
-                                                ),
-                                                Text(
-                                                  lista.categoria!,
-                                                  style: const TextStyle(
-                                                      fontSize: 14.0),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          PopupMenuButton<String>(
-                                            onSelected: (String value) {
-                                              _handleMenuAction(
-                                                  context,
-                                                  value,
-                                                  lista,
-                                                  listaDeComprasServices);
-                                            },
-                                            itemBuilder:
-                                                (BuildContext context) => [
-                                              const PopupMenuItem<String>(
-                                                value: 'editar',
-                                                child: Row(
-                                                  children: [
-                                                    Icon(Icons.edit, size: 20),
-                                                    SizedBox(width: 8),
-                                                    Text('Editar'),
-                                                  ],
-                                                ),
-                                              ),
-                                              const PopupMenuItem<String>(
-                                                value: 'compartilhar',
-                                                child: Row(
-                                                  children: [
-                                                    Icon(Icons.share, size: 20),
-                                                    SizedBox(width: 8),
-                                                    Text('Compartilhar'),
-                                                  ],
-                                                ),
-                                              ),
-                                              const PopupMenuItem<String>(
-                                                value: 'excluir',
-                                                child: Row(
-                                                  children: [
-                                                    Icon(Icons.delete,
-                                                        size: 20,
-                                                        color: Colors.red),
-                                                    SizedBox(width: 8),
-                                                    Text('Excluir',
-                                                        style: TextStyle(
-                                                            color: Colors.red)),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                            icon: const Icon(Icons.more_vert),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      );
+return ListView.builder(
+  itemCount: snapshot.data!.docs.length,
+  itemBuilder: (context, index) {
+    DocumentSnapshot ds = snapshot.data!.docs[index];
+    ListaDeCompras lista = ListaDeCompras.fromDocument(ds);
+
+    Map<String, dynamic>? acessos = (ds.data() as Map<String, dynamic>)['acessos'];
+    Map<String, dynamic>? meuAcesso = acessos != null ? acessos[userId] : null;
+
+    Color backgroundColor = Colors.grey[200]!;
+    IconData acessoIcon = Icons.remove_red_eye;
+
+    if (meuAcesso != null) {
+      if (meuAcesso['podeExcluir'] == true) {
+        backgroundColor = Colors.red[100]!;
+        acessoIcon = Icons.admin_panel_settings;
+      } else if (meuAcesso['podeEditar'] == true) {
+        backgroundColor = Colors.blue[100]!;
+        acessoIcon = Icons.edit;
+      } else if (meuAcesso['podeVisualizar'] == true) {
+        backgroundColor = Colors.green[100]!;
+        acessoIcon = Icons.visibility;
+      }
+    }
+
+    return GestureDetector(
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 5),
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(8.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 4,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
+        child: ListTile(
+          leading: Icon(acessoIcon),
+          title: Text(
+            lista.nome ?? 'Sem nome',
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16.0,
+            ),
+          ),
+          subtitle: Text(
+            lista.categoria ?? '',
+            style: const TextStyle(fontSize: 14.0),
+          ),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ComprasListasItensPage(
+                  id: lista.id!,
+                  nome: lista.nome ?? 'Sem nome',
+                ),
+              ),
+            );
+          },
+          trailing: PopupMenuButton<String>(
+            onSelected: (String value) {
+              _handleMenuAction(
+                  context,
+                  value,
+                  lista,
+                  Provider.of<ListaDeComprasServices>(context, listen: false));
+            },
+            itemBuilder: (BuildContext context) => [
+              const PopupMenuItem<String>(
+                value: 'editar',
+                child: Row(
+                  children: [
+                    Icon(Icons.edit, size: 20),
+                    SizedBox(width: 8),
+                    Text('Editar'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'compartilhar',
+                child: Row(
+                  children: [
+                    Icon(Icons.share, size: 20),
+                    SizedBox(width: 8),
+                    Text('Compartilhar'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'excluir',
+                child: Row(
+                  children: [
+                    Icon(Icons.delete, size: 20, color: Colors.red),
+                    SizedBox(width: 8),
+                    Text('Excluir', style: TextStyle(color: Colors.red)),
+                  ],
+                ),
+              ),
+            ],
+            icon: const Icon(Icons.more_vert),
+          ),
+        ),
+      ),
+    );
+  },
+);
+
                     },
                   );
                 },
