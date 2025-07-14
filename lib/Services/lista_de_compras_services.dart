@@ -21,7 +21,7 @@ class ListaDeComprasServices extends ChangeNotifier {
     dynamic resultado;
 
     lista.usuarioCriador = user!.uid;
- 
+
 
     try {
       if (lista.id != null) {
@@ -37,39 +37,42 @@ class ListaDeComprasServices extends ChangeNotifier {
     } catch (e) {
       return {'success': false, 'message': 'Erro ao salvar a lista: $e'};
     }
-  }
+}
 
-  Future<String> criarLista(ListaDeCompras lista) async {
-    DocumentReference docRef = await _collectionRefLista.add(lista.toJson());
+Future<String> criarLista(ListaDeCompras lista) async {
+  final userId = user!.uid;
 
-    await docRef.update({'id': docRef.id});
+  lista.acessos = {
+    userId: {
+      'podeVisualizar': true,
+      'podeEditar': true,
+      'podeExcluir': true,
+    }
+  };
 
-    var listaPorUsuario = ListasPorUsuarios(
-        listaId: docRef.id,
-        usuarioId: user!.uid,
-        podeVisualizar: true,
-        podeEditar: true,
-        podeExcluir: true);
+  DocumentReference docRef = await _collectionRefLista.add(lista.toJson());
 
-    DocumentReference docRef2 = await _collectionRefListasPorUsuario.add(listaPorUsuario.toJson());
-    await docRef2.update({'id': docRef2.id});
+  await docRef.update({'id': docRef.id});
 
-    return "lista criada";
-  }
+  return "Lista criada com sucesso";
+}
 
-  Future<String> atualizarLista(ListaDeCompras lista) async {
-    await _collectionRefLista
-        .doc(lista.id)
-        .set(lista.toJson(), SetOptions(merge: true));
-    return "Lista atualizada com sucesso";
-  }
+Future<String> atualizarLista(ListaDeCompras lista) async {
+  await _collectionRefLista
+      .doc(lista.id)
+      .set(lista.toJson(), SetOptions(merge: true));
+  return "Lista atualizada com sucesso";
+}
 
   Stream<QuerySnapshot> buscarListas() {
-    String? userId = user!.uid;
-    return _collectionRefLista
-        .where('usuarioCriador', isEqualTo: userId)
-        .snapshots();
+  String? userId = user?.uid;
+  if (userId == null) return const Stream.empty();
+
+  return _collectionRefLista
+      .where('acessos.$userId.podeVisualizar', isEqualTo: true)
+      .snapshots();
   }
+
 
   Future<Map<String, dynamic>> excluirLista(String? id) async {
     try {
