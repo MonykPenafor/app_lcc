@@ -120,22 +120,7 @@ class _CadastroUsuarioPageState extends State<CadastroUsuarioPage> {
                         String senha = _senhaController.text;
                         print("Usuário cadastrado: $nome, $email");
                         _autServico.cadastrarUsuario(
-                          nome: nome,
-                          senha: senha,
-                          email: email,
-                        ).then((_) {
-                          // Cadastro bem-sucedido: redireciona para a tela de login
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (_) => const LoginPage()),
-                          );
-                        }).catchError((e) {
-                          // Em caso de erro, mostre um alerta
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text("Erro ao cadastrar usuário: $e")),
-                          );
-                        });
-
+                            nome: nome, senha: senha, email: email);
                       }
                     },
                     style: ElevatedButton.styleFrom(

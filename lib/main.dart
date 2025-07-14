@@ -5,6 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'Pages/recuperar_senha_page.dart';
+import 'Pages/home/perfil_page.dart';
 import 'Pages/login_page.dart';
 import 'Pages/home/main_navigation_page.dart';
 import 'Pages/home/tela_principal_page.dart';
@@ -58,6 +60,7 @@ class MyApp extends StatelessWidget {
             '/perfilUsuario': (context) => const PerfilUsuario(),
             '/mainNav' :(context) => const MainNavigationPage(),
             '/main':(context) => TelaPrincipalPage(),
+            '/recuperarSenha': (context) => PerfilPage(),
         },     
         debugShowCheckedModeBanner: false,
       ),
