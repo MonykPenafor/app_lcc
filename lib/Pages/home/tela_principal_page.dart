@@ -286,79 +286,108 @@ class TelaPrincipalPage extends StatelessWidget {
   }
 
   void _editarLista(
-    BuildContext context,
-    ListaDeCompras lista,
-    ListaDeComprasServices listaDeComprasServices,
-  ) {
-    final TextEditingController nomeEditController =
-        TextEditingController(text: lista.nome);
-    final TextEditingController categoriaEditController =
-        TextEditingController(text: lista.categoria);
+  BuildContext context,
+  ListaDeCompras lista,
+  ListaDeComprasServices listaDeComprasServices,
+) async {
+  final doc = await listaDeComprasServices.getListaDocumento(lista.id);
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Editar Lista'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                controller: nomeEditController,
-                decoration: const InputDecoration(
-                  labelText: "Nome",
-                  border: OutlineInputBorder(),
-                ),
+  if (doc == null) {
+    CustomSnackBar.show(context, 'Lista não encontrada.', false);
+    return;
+  }
+
+  final data = doc.data() as Map<String, dynamic>;
+  final userId = listaDeComprasServices.user?.uid;
+
+  final acessos = data['acessos'] as Map<String, dynamic>?;
+
+  bool podeEditar = false;
+
+  if (userId != null && acessos != null) {
+    if (acessos.containsKey(userId) && acessos[userId]['podeEditar'] == true) {
+      podeEditar = true;
+    }
+  }
+
+  if (!podeEditar) {
+    CustomSnackBar.show(
+      context,
+      'Você não tem permissão para editar esta lista.',
+      false,
+    );
+    return;
+  }
+
+  final TextEditingController nomeEditController =
+      TextEditingController(text: lista.nome);
+  final TextEditingController categoriaEditController =
+      TextEditingController(text: lista.categoria);
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Editar Lista'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              controller: nomeEditController,
+              decoration: const InputDecoration(
+                labelText: "Nome",
+                border: OutlineInputBorder(),
               ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: categoriaEditController,
-                decoration: const InputDecoration(
-                  labelText: "Categoria",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancelar'),
             ),
-            ElevatedButton(
-              onPressed: () async {
-                String nome = nomeEditController.text.trim();
-                String categoria = categoriaEditController.text.trim();
-
-                if (nome.isEmpty || categoria.isEmpty) {
-                  CustomSnackBar.show(
-                    context,
-                    'Preencha todos os campos!',
-                    false,
-                  );
-                  return;
-                }
-
-                lista.nome = nome;
-                lista.categoria = categoria;
-
-                var result = await listaDeComprasServices.salvarLista(lista);
-
-                Navigator.of(context).pop();
-
-                CustomSnackBar.show(
-                  context,
-                  result['message'] ?? 'Lista atualizada com sucesso!',
-                  result['success'] ?? true,
-                );
-              },
-              child: const Text('Salvar'),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: categoriaEditController,
+              decoration: const InputDecoration(
+                labelText: "Categoria",
+                border: OutlineInputBorder(),
+              ),
             ),
           ],
-        );
-      },
-    );
-  }
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              String nome = nomeEditController.text.trim();
+              String categoria = categoriaEditController.text.trim();
+
+              if (nome.isEmpty || categoria.isEmpty) {
+                CustomSnackBar.show(
+                  context,
+                  'Preencha todos os campos!',
+                  false,
+                );
+                return;
+              }
+
+              lista.nome = nome;
+              lista.categoria = categoria;
+
+              var result = await listaDeComprasServices.salvarLista(lista);
+
+              Navigator.of(context).pop();
+
+              CustomSnackBar.show(
+                context,
+                result['message'] ?? 'Lista atualizada com sucesso!',
+                result['success'] ?? true,
+              );
+            },
+            child: const Text('Salvar'),
+          ),
+        ],
+      );
+    },
+  );
+}
 
 void _compartilharLista(
   BuildContext context,

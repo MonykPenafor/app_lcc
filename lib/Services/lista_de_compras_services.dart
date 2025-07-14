@@ -229,6 +229,13 @@ Future<DocumentSnapshot<Map<String, dynamic>>?> getListaDocumento(String? id) as
   }
 }
 
+Future<Map<String, dynamic>?> getUserAccessForList(String listId, String userId) async {
+  final doc = await FirebaseFirestore.instance.collection('listas').doc(listId).get();
+  if (!doc.exists) return null;
+  final acessos = doc.get('acessos') as Map<String, dynamic>?;
+  if (acessos == null) return null;
+  return acessos[userId] as Map<String, dynamic>?;
+}
 
 
 }

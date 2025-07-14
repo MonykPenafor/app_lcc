@@ -20,8 +20,48 @@ class _ComprasListasItensPageState extends State<ComprasListasItensPage> {
   final _obsController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
+  Map<String, dynamic>? userAccess;
+  bool isLoadingAccess = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserAccess();
+  }
+
+  Future<void> _loadUserAccess() async {
+    final userId = _listaService.user?.uid;
+    if (userId == null) {
+      setState(() {
+        userAccess = null;
+        isLoadingAccess = false;
+      });
+      return;
+    }
+    final access = await _listaService.getUserAccessForList(widget.id, userId);
+    setState(() {
+      userAccess = access;
+      isLoadingAccess = false;
+    });
+  }
+
+  bool get canEditItems => userAccess?['podeEditar'] == true;
+  bool get canDeleteItems => userAccess?['podeExcluir'] == true;
+  bool get canViewItems => userAccess?['podeVisualizar'] == true;
+
   @override
   Widget build(BuildContext context) {
+    if (isLoadingAccess) {
+      return const Scaffold(
+          body: Center(child: CircularProgressIndicator()));
+    }
+
+    if (!canViewItems) {
+      return Scaffold(
+          appBar: AppBar(title: Text(widget.nome)),
+          body: const Center(child: Text('Você não tem permissão para visualizar esta lista.')));
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.nome),
@@ -36,16 +76,14 @@ class _ComprasListasItensPageState extends State<ComprasListasItensPage> {
             return Center(
                 child: Text('Erro ao carregar itens: ${snapshot.error}'));
           }
-          final itens = snapshot.data ??
-              []; // Garante uma lista vazia se não houver dados
+          final itens = snapshot.data ?? [];
 
-          // calcular progresso
           int totalItens = itens.length;
           int boughtItens = itens.where((item) => item.isBought).length;
           double progress = totalItens > 0 ? boughtItens / totalItens : 0.0;
+
           return Column(
             children: [
-              // Barra de Progresso (só mostra se houver itens)
               if (totalItens > 0)
                 Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -59,9 +97,7 @@ class _ComprasListasItensPageState extends State<ComprasListasItensPage> {
                             Theme.of(context).primaryColor),
                         minHeight: 8,
                       ),
-                      const SizedBox(
-                        height: 4,
-                      ),
+                      const SizedBox(height: 4),
                       Text(
                         "${(progress * 100).toStringAsFixed(0)}% Concluído ($boughtItens de $totalItens itens)",
                         style: Theme.of(context).textTheme.bodySmall,
@@ -69,70 +105,78 @@ class _ComprasListasItensPageState extends State<ComprasListasItensPage> {
                     ],
                   ),
                 ),
-              // Mensagem se a lista estiver vazia
-              if (itens.isEmpty &&
-                  snapshot.connectionState != ConnectionState.waiting)
+              if (itens.isEmpty && snapshot.connectionState != ConnectionState.waiting)
                 const Expanded(
                   child: Center(child: Text('Nenhum item nesta lista ainda')),
                 )
-              // Lista de Itens (ocupa o espaço restante)
               else
                 Expanded(
-                    child: ListView.builder(
-                        itemCount: itens.length,
-                        itemBuilder: (context, index) {
-                          final item = itens[index];
-                          return ListTile(
-                            leading: Checkbox(
-                                value: item.isBought,
-                                onChanged: (bool? newValue) {
+                  child: ListView.builder(
+                    itemCount: itens.length,
+                    itemBuilder: (context, index) {
+                      final item = itens[index];
+                      return ListTile(
+                        leading: Checkbox(
+                          value: item.isBought,
+                          onChanged: canEditItems
+                              ? (bool? newValue) {
                                   if (newValue != null) {
                                     _updateItemStatus(item, newValue);
                                   }
-                                }),
-                            title: Text(
-                              item.itemNome,
-                              style: TextStyle(
-                                decoration: item.isBought
-                                    ? TextDecoration.lineThrough
-                                    : TextDecoration.none,
-                                color: item.isBought ? Colors.grey : null,
-                              ),
-                            ),
-                            subtitle: Text(
-                              'Qdt:${item.quantidade}${item.obs != null && item.obs!.isNotEmpty ? " - Obs: ${item.obs}" : ""}',
-                              style: TextStyle(
-                                decoration: item.isBought
-                                    ? TextDecoration.lineThrough
-                                    : TextDecoration.none,
-                                color: item.isBought ? Colors.grey : null,
-                              ),
-                            ),
-                            onTap: () {
-                              _updateItemStatus(item, !item.isBought);
-                            },
-                            trailing: IconButton(
-                              icon: const Icon(Icons.delete_outlined,
-                                  color: Colors.redAccent),
-                              tooltip: 'Remover Item',
-                              onPressed: () {
-                                _deleteItem(item);
-                              },
-                            ),
-                          );
-                        }))
+                                }
+                              : null, // desabilita checkbox se não pode editar
+                        ),
+                        title: Text(
+                          item.itemNome,
+                          style: TextStyle(
+                            decoration: item.isBought
+                                ? TextDecoration.lineThrough
+                                : TextDecoration.none,
+                            color: item.isBought ? Colors.grey : null,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'Qdt:${item.quantidade}${item.obs != null && item.obs!.isNotEmpty ? " - Obs: ${item.obs}" : ""}',
+                          style: TextStyle(
+                            decoration: item.isBought
+                                ? TextDecoration.lineThrough
+                                : TextDecoration.none,
+                            color: item.isBought ? Colors.grey : null,
+                          ),
+                        ),
+                        onTap: canEditItems
+                            ? () {
+                                _updateItemStatus(item, !item.isBought);
+                              }
+                            : null,
+                        trailing: canDeleteItems
+                            ? IconButton(
+                                icon: const Icon(Icons.delete_outlined,
+                                    color: Colors.redAccent),
+                                tooltip: 'Remover Item',
+                                onPressed: () {
+                                  _deleteItem(item);
+                                },
+                              )
+                            : null,
+                      );
+                    },
+                  ),
+                )
             ],
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddItemDialog(context),
-        tooltip: 'Adicionar Item',
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: canEditItems
+          ? FloatingActionButton(
+              onPressed: () => _showAddItemDialog(context),
+              tooltip: 'Adicionar Item',
+              child: const Icon(Icons.add),
+            )
+          : null,
     );
   }
-
+  
   @override
   void dispose() {
     _itemNomeController.dispose();
