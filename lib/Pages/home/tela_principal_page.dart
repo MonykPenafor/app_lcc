@@ -452,45 +452,84 @@ void _compartilharLista(
   );
 }
 
-  void _excluirLista(
-    BuildContext context,
-    ListaDeCompras lista,
-    ListaDeComprasServices listaDeComprasServices,
-  ) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Excluir Lista'),
-          content:
-              Text('Tem certeza que deseja excluir a lista "${lista.nome}"?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancelar'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                var result =
-                    await listaDeComprasServices.excluirLista(lista.id);
+ void _excluirLista(
+  BuildContext context,
+  ListaDeCompras lista,
+  ListaDeComprasServices listaDeComprasServices,
+) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Excluir Lista'),
+        content:
+            Text('Tem certeza que deseja excluir a lista "${lista.nome}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
 
-                Navigator.of(context).pop();
+              final doc = await listaDeComprasServices.getListaDocumento(lista.id);
 
+              if (doc == null) {
                 CustomSnackBar.show(
                   context,
-                  result['message'] ?? 'Lista excluída com sucesso!',
-                  result['success'] ?? true,
+                  'Lista não encontrada.',
+                  false,
                 );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('Excluir'),
+                return;
+              }
+
+              final data = doc.data() as Map<String, dynamic>;
+              final usuarioCriador = data['usuarioCriador'];
+              final userId = listaDeComprasServices.user?.uid;
+
+              // Verifica permissões no campo 'acessos'
+              final acessos = data['acessos'] as Map<String, dynamic>?;
+
+              bool podeExcluir = false;
+
+              if (userId != null) {
+                if (userId == usuarioCriador) {
+                  podeExcluir = true;
+                } else if (acessos != null &&
+                    acessos.containsKey(userId) &&
+                    acessos[userId]['podeExcluir'] == true) {
+                  podeExcluir = true;
+                }
+              }
+
+              if (!podeExcluir) {
+                CustomSnackBar.show(
+                  context,
+                  'Você não tem permissão para excluir esta lista.',
+                  false,
+                );
+                return;
+              }
+
+              var result = await listaDeComprasServices.excluirLista(lista.id);
+
+              CustomSnackBar.show(
+                context,
+                result['message'] ?? 'Lista excluída com sucesso!',
+                result['success'] ?? true,
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
             ),
-          ],
-        );
-      },
-    );
-  }
+            child: const Text('Excluir'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 }

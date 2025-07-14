@@ -86,66 +86,66 @@ Future<String> atualizarLista(ListaDeCompras lista) async {
       return {'success': false, 'message': 'Erro ao excluir a lista: $e'};
     }
   }
+Future<Map<String, dynamic>> compartilharLista(
+  String? listaId,
+  String email,
+  String permissao,
+) async {
+  try {
+    var idUsuario = await retornarIdUsuarioPeloEmail(email);
+    if (idUsuario == null) {
+      return {
+        'success': false,
+        'message': 'Usuário com o e-mail $email não encontrado.',
+      };
+    }
 
-  Future<Map<String, dynamic>> compartilharLista(
-      String? listaId, String email, String permissao) async {
-    try {
+    bool podeVisualizar = false;
+    bool podeEditar = false;
+    bool podeExcluir = false;
 
-      var idUsuario = await retornarIdUsuarioPeloEmail(email);
-      if (idUsuario == null) {
+    switch (permissao) {
+      case 'convidado':
+        podeVisualizar = true;
+        break;
+
+      case 'participante':
+        podeVisualizar = true;
+        podeEditar = true;
+        break;
+
+      case 'administrador':
+        podeVisualizar = true;
+        podeEditar = true;
+        podeExcluir = true;
+        break;
+
+      default:
         return {
           'success': false,
-          'message': 'Usuário com o e-mail $email não encontrado.',
+          'message': 'Permissão inválida',
         };
-      }
-
-      bool podeVisualizar = false;
-      bool podeEditar = false;
-      bool podeExcluir = false;
-
-      switch (permissao) {
-        case 'convidado':
-          podeVisualizar = true;
-          break;
-
-        case 'participante':
-          podeVisualizar = true;
-          podeEditar = true;
-          break;
-
-        case 'administrador':
-          podeVisualizar = true;
-          podeEditar = true;
-          podeExcluir = true;
-          break;
-
-        default:
-          return {
-            'success': false,
-            'message': 'Permissão inválida',
-          };
-      }
-
-      var listaPorUsuario = ListasPorUsuarios(
-        listaId: listaId,
-        usuarioId: idUsuario,
-        podeVisualizar: podeVisualizar,
-        podeEditar: podeEditar,
-        podeExcluir: podeExcluir,
-      );
-
-      DocumentReference docRef =
-          await _collectionRefListasPorUsuario.add(listaPorUsuario.toJson());
-      await docRef.update({'id': docRef.id});
-
-      return {
-        'success': true,
-        'message': 'Lista compartilhada com sucesso',
-      };
-    } catch (e) {
-      return {'success': false, 'message': 'Erro ao compartilhar a lista: $e'};
     }
+
+    await _collectionRefLista.doc(listaId).update({
+      'acessos.$idUsuario': {
+        'podeVisualizar': podeVisualizar,
+        'podeEditar': podeEditar,
+        'podeExcluir': podeExcluir,
+      }
+    });
+
+    return {
+      'success': true,
+      'message': 'Lista compartilhada com sucesso!',
+    };
+  } catch (e) {
+    return {
+      'success': false,
+      'message': 'Erro ao compartilhar a lista: $e',
+    };
   }
+}
 
   CollectionReference<Item> _itemsRef(String listId) => _collectionRefLista
       .doc(listId)
@@ -216,6 +216,18 @@ Future<String> atualizarLista(ListaDeCompras lista) async {
       return null;
     }
   }
+
+Future<DocumentSnapshot<Map<String, dynamic>>?> getListaDocumento(String? id) async {
+  if (id == null) return null;
+
+  try {
+    final doc = await _collectionRefLista.doc(id).get();
+    return doc as DocumentSnapshot<Map<String, dynamic>>;
+  } catch (e) {
+    print('Erro ao buscar documento da lista: $e');
+    return null;
+  }
+}
 
 
 
