@@ -60,7 +60,7 @@ class MyApp extends StatelessWidget {
             '/perfilUsuario': (context) => const PerfilUsuario(),
             '/mainNav' :(context) => const MainNavigationPage(),
             '/main':(context) => TelaPrincipalPage(),
-            '/recuperarSenha': (context) => PerfilPage(),
+            '/recuperarSenha': (context) => RecuperarSenhaPage(),
         },     
         debugShowCheckedModeBanner: false,
       ),
