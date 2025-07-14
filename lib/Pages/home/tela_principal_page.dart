@@ -388,12 +388,33 @@ class TelaPrincipalPage extends StatelessWidget {
     },
   );
 }
-
 void _compartilharLista(
   BuildContext context,
   ListaDeCompras lista,
   ListaDeComprasServices listaDeComprasServices
 ) {
+  final currentUserId = listaDeComprasServices.user?.uid;
+
+  // Verifica permissão de administrador
+  bool isAdmin = false;
+  if (lista.acessos != null && currentUserId != null) {
+    final acessoUsuario = lista.acessos![currentUserId];
+    if (acessoUsuario != null && acessoUsuario['podeExcluir'] == true) {
+      isAdmin = true;
+    }
+  }
+
+  if (!isAdmin) {
+    // Usuário não tem permissão para compartilhar
+    CustomSnackBar.show(
+      context,
+      'Apenas administradores podem compartilhar esta lista.',
+      false,
+    );
+    return; // Sai da função, não abre o diálogo
+  }
+
+  // Se for admin, continua e abre o diálogo
   final TextEditingController emailController = TextEditingController();
   String selectedPermissao = 'convidado'; // valor padrão
 
