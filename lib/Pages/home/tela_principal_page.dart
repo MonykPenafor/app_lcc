@@ -1,8 +1,6 @@
-import 'package:app_lcc/Models/app_user.dart';
 import 'package:app_lcc/Models/lista_de_compras.dart';
 import 'package:app_lcc/Services/lista_de_compras_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -17,7 +15,6 @@ class TelaPrincipalPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    User? user = FirebaseAuth.instance.currentUser;
     
     return Scaffold(
       appBar: AppBar(
@@ -37,7 +34,7 @@ class TelaPrincipalPage extends StatelessWidget {
                     (context, listaDeComprasServices, child) {
                   return StreamBuilder(
                     stream: listaDeComprasServices
-                        .buscarListas(user),
+                        .buscarListas(),
                     builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
@@ -231,8 +228,7 @@ class TelaPrincipalPage extends StatelessWidget {
                       String categoria = _categoriaCntroller.text.trim();
 
                       if (nome.isEmpty ||
-                          categoria.isEmpty ||
-                          user == null) {
+                          categoria.isEmpty) {
                         CustomSnackBar.show(
                           context,
                           'Preencha todos os campos!',
@@ -244,7 +240,6 @@ class TelaPrincipalPage extends StatelessWidget {
                       var novaLista = ListaDeCompras(
                           nome: nome,
                           categoria: categoria,
-                          usuarioCriador: user.uid,
                           );
 
                       var result = await listaServices.salvarLista(novaLista);
@@ -365,66 +360,97 @@ class TelaPrincipalPage extends StatelessWidget {
     );
   }
 
-  void _compartilharLista(BuildContext context, ListaDeCompras lista,
-      ListaDeComprasServices listaDeComprasServices) {
-    final TextEditingController emailController = TextEditingController();
+void _compartilharLista(
+  BuildContext context,
+  ListaDeCompras lista,
+  ListaDeComprasServices listaDeComprasServices
+) {
+  final TextEditingController emailController = TextEditingController();
+  String selectedPermissao = 'convidado'; // valor padrão
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Compartilhar Lista'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Compartilhar "${lista.nome}" com:'),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: emailController,
-                decoration: const InputDecoration(
-                  labelText: "Email do usuário",
-                  border: OutlineInputBorder(),
-                  hintText: "usuario@email.com",
-                ),
-                keyboardType: TextInputType.emailAddress,
+  final Map<String, String> permissoes = {
+    'convidado': 'Somente visualização',
+    'participante': 'Pode editar itens',
+    'administrador': 'Pode editar e excluir',
+  };
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Compartilhar Lista "${lista.nome}"'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              controller: emailController,
+              decoration: const InputDecoration(
+                labelText: "E-mail do usuário",
+                border: OutlineInputBorder(),
+                hintText: "usuario@email.com",
               ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancelar'),
+              keyboardType: TextInputType.emailAddress,
             ),
-            ElevatedButton(
-              onPressed: () async {
-                String email = emailController.text.trim();
-
-                if (email.isEmpty) {
-                  CustomSnackBar.show(
-                    context,
-                    'Digite um email válido!',
-                    false,
-                  );
-                  return;
-                }
-
-                await listaDeComprasServices.compartilharLista(lista.id, email);
-
-                Navigator.of(context).pop();
-
-                CustomSnackBar.show(
-                  context,
-                  'Lista compartilhada com $email!',
-                  true,
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              value: selectedPermissao,
+              decoration: const InputDecoration(
+                labelText: 'Tipo de acesso',
+                border: OutlineInputBorder(),
+              ),
+              items: permissoes.entries.map((entry) {
+                return DropdownMenuItem<String>(
+                  value: entry.key,
+                  child: Text('${entry.key[0].toUpperCase()}${entry.key.substring(1)} - ${entry.value}'),
                 );
+              }).toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  selectedPermissao = value;
+                }
               },
-              child: const Text('Compartilhar'),
             ),
           ],
-        );
-      },
-    );
-  }
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final email = emailController.text.trim();
+
+              if (email.isEmpty) {
+                CustomSnackBar.show(
+                  context,
+                  'Digite um e-mail válido!',
+                  false,
+                );
+                return;
+              }
+
+              Navigator.of(context).pop(); // Fecha o modal
+
+              await listaDeComprasServices.compartilharLista(
+                lista.id,
+                email,
+                selectedPermissao,
+              );
+
+              CustomSnackBar.show(
+                context,
+                'Lista compartilhada com $email como ${selectedPermissao.toUpperCase()}!',
+                true,
+              );
+            },
+            child: const Text('Compartilhar'),
+          ),
+        ],
+      );
+    },
+  );
+}
 
   void _excluirLista(
     BuildContext context,

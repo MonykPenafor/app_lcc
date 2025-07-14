@@ -8,6 +8,9 @@ import '../Models/item.dart';
 
 class ListaDeComprasServices extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  User? get user => _auth.currentUser;
 
   CollectionReference get _collectionRefLista =>
       _firestore.collection("listas");
@@ -16,6 +19,9 @@ class ListaDeComprasServices extends ChangeNotifier {
 
   Future<Map<String, dynamic>> salvarLista(ListaDeCompras lista) async {
     dynamic resultado;
+
+    lista.usuarioCriador = user!.uid;
+ 
 
     try {
       if (lista.id != null) {
@@ -40,7 +46,7 @@ class ListaDeComprasServices extends ChangeNotifier {
 
     var listaPorUsuario = ListasPorUsuarios(
         listaId: docRef.id,
-        usuarioId: lista.usuarioCriador,
+        usuarioId: user!.uid,
         podeVisualizar: true,
         podeEditar: true,
         podeExcluir: true);
@@ -55,10 +61,10 @@ class ListaDeComprasServices extends ChangeNotifier {
     await _collectionRefLista
         .doc(lista.id)
         .set(lista.toJson(), SetOptions(merge: true));
-    return "Event updated successfully";
+    return "Lista atualizada com sucesso";
   }
 
-  Stream<QuerySnapshot> buscarListas(User? user) {
+  Stream<QuerySnapshot> buscarListas() {
     String? userId = user!.uid;
     return _collectionRefLista
         .where('usuarioCriador', isEqualTo: userId)
@@ -79,13 +85,51 @@ class ListaDeComprasServices extends ChangeNotifier {
   }
 
   Future<Map<String, dynamic>> compartilharLista(
-      String? listaId, String email) async {
+      String? listaId, String email, String permissao) async {
     try {
-      //var idUsuario = _userServices.retornarIdUsuarioPeloEmail(email);
-      var idUsuario = '123';
+
+      var idUsuario = await retornarIdUsuarioPeloEmail(email);
+      if (idUsuario == null) {
+        return {
+          'success': false,
+          'message': 'Usuário com o e-mail $email não encontrado.',
+        };
+      }
+
+      bool podeVisualizar = false;
+      bool podeEditar = false;
+      bool podeExcluir = false;
+
+      switch (permissao) {
+        case 'convidado':
+          podeVisualizar = true;
+          break;
+
+        case 'participante':
+          podeVisualizar = true;
+          podeEditar = true;
+          break;
+
+        case 'administrador':
+          podeVisualizar = true;
+          podeEditar = true;
+          podeExcluir = true;
+          break;
+
+        default:
+          return {
+            'success': false,
+            'message': 'Permissão inválida',
+          };
+      }
 
       var listaPorUsuario = ListasPorUsuarios(
-          listaId: listaId, usuarioId: idUsuario, podeVisualizar: true);
+        listaId: listaId,
+        usuarioId: idUsuario,
+        podeVisualizar: podeVisualizar,
+        podeEditar: podeEditar,
+        podeExcluir: podeExcluir,
+      );
 
       DocumentReference docRef =
           await _collectionRefListasPorUsuario.add(listaPorUsuario.toJson());
@@ -93,7 +137,7 @@ class ListaDeComprasServices extends ChangeNotifier {
 
       return {
         'success': true,
-        'message': 'Lista compartilhada',
+        'message': 'Lista compartilhada com sucesso',
       };
     } catch (e) {
       return {'success': false, 'message': 'Erro ao compartilhar a lista: $e'};
@@ -150,4 +194,26 @@ class ListaDeComprasServices extends ChangeNotifier {
       rethrow;
     }
   }
+
+  Future<String?> retornarIdUsuarioPeloEmail(String email) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('usuarios')
+          .where('email', isEqualTo: email)
+          .limit(1)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        return querySnapshot.docs.first.id;
+      } else {
+        return null; 
+      }
+    } catch (e) {
+      print('Erro ao buscar usuário por e-mail: $e');
+      return null;
+    }
+  }
+
+
+
 }
