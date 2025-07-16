@@ -29,10 +29,12 @@ class _LoginPageState extends State<LoginPage> {
         email: _emailController.text.trim(),
         password: _senhaController.text,
       );
-      Navigator.pushReplacement(
-  context,
-  MaterialPageRoute(builder: (_) => const MainNavigationPage()),
-);
+  Navigator.pushAndRemoveUntil(
+    context,
+    MaterialPageRoute(builder: (_) => const MainNavigationPage()),
+    (Route<dynamic> route) => false, // Remove todas as rotas anteriores
+  );
+
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erro ao fazer login: ${e.toString()}')),
