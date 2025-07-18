@@ -15,7 +15,6 @@ class TelaPrincipalPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -30,11 +29,9 @@ class TelaPrincipalPage extends StatelessWidget {
           children: [
             Expanded(
               child: Consumer<ListaDeComprasServices>(
-                builder:
-                    (context, listaDeComprasServices, child) {
+                builder: (context, listaDeComprasServices, child) {
                   return StreamBuilder(
-                    stream: listaDeComprasServices
-                        .buscarListas(),
+                    stream: listaDeComprasServices.buscarListas(),
                     builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
@@ -49,119 +46,132 @@ class TelaPrincipalPage extends StatelessWidget {
                         );
                       }
 
-                      final userId = Provider.of<ListaDeComprasServices>(context, listen: false).user?.uid;
+                      final userId = Provider.of<ListaDeComprasServices>(
+                              context,
+                              listen: false)
+                          .user
+                          ?.uid;
 
-return ListView.builder(
-  itemCount: snapshot.data!.docs.length,
-  itemBuilder: (context, index) {
-    DocumentSnapshot ds = snapshot.data!.docs[index];
-    ListaDeCompras lista = ListaDeCompras.fromDocument(ds);
+                      return ListView.builder(
+                        itemCount: snapshot.data!.docs.length,
+                        itemBuilder: (context, index) {
+                          DocumentSnapshot ds = snapshot.data!.docs[index];
+                          ListaDeCompras lista =
+                              ListaDeCompras.fromDocument(ds);
 
-    Map<String, dynamic>? acessos = (ds.data() as Map<String, dynamic>)['acessos'];
-    Map<String, dynamic>? meuAcesso = acessos != null ? acessos[userId] : null;
+                          Map<String, dynamic>? acessos =
+                              (ds.data() as Map<String, dynamic>)['acessos'];
+                          Map<String, dynamic>? meuAcesso =
+                              acessos != null ? acessos[userId] : null;
 
-    Color backgroundColor = Colors.grey[200]!;
-    IconData acessoIcon = Icons.remove_red_eye;
+                          Color backgroundColor = Colors.grey[200]!;
+                          IconData acessoIcon = Icons.remove_red_eye;
 
-    if (meuAcesso != null) {
-      if (meuAcesso['podeExcluir'] == true) {
-        backgroundColor = Colors.red[100]!;
-        acessoIcon = Icons.admin_panel_settings;
-      } else if (meuAcesso['podeEditar'] == true) {
-        backgroundColor = Colors.blue[100]!;
-        acessoIcon = Icons.edit;
-      } else if (meuAcesso['podeVisualizar'] == true) {
-        backgroundColor = Colors.green[100]!;
-        acessoIcon = Icons.visibility;
-      }
-    }
+                          if (meuAcesso != null) {
+                            if (meuAcesso['podeExcluir'] == true) {
+                              backgroundColor = Colors.red[100]!;
+                              acessoIcon = Icons.admin_panel_settings;
+                            } else if (meuAcesso['podeEditar'] == true) {
+                              backgroundColor = Colors.blue[100]!;
+                              acessoIcon = Icons.edit;
+                            } else if (meuAcesso['podeVisualizar'] == true) {
+                              backgroundColor = Colors.green[100]!;
+                              acessoIcon = Icons.visibility;
+                            }
+                          }
 
-    return GestureDetector(
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 5),
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(8.0),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 4,
-              spreadRadius: 1,
-            ),
-          ],
-        ),
-        child: ListTile(
-          leading: Icon(acessoIcon),
-          title: Text(
-            lista.nome ?? 'Sem nome',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16.0,
-            ),
-          ),
-          subtitle: Text(
-            lista.categoria ?? '',
-            style: const TextStyle(fontSize: 14.0),
-          ),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ComprasListasItensPage(
-                  id: lista.id!,
-                  nome: lista.nome ?? 'Sem nome',
-                ),
-              ),
-            );
-          },
-          trailing: PopupMenuButton<String>(
-            onSelected: (String value) {
-              _handleMenuAction(
-                  context,
-                  value,
-                  lista,
-                  Provider.of<ListaDeComprasServices>(context, listen: false));
-            },
-            itemBuilder: (BuildContext context) => [
-              const PopupMenuItem<String>(
-                value: 'editar',
-                child: Row(
-                  children: [
-                    Icon(Icons.edit, size: 20),
-                    SizedBox(width: 8),
-                    Text('Editar'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem<String>(
-                value: 'compartilhar',
-                child: Row(
-                  children: [
-                    Icon(Icons.share, size: 20),
-                    SizedBox(width: 8),
-                    Text('Compartilhar'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem<String>(
-                value: 'excluir',
-                child: Row(
-                  children: [
-                    Icon(Icons.delete, size: 20, color: Colors.red),
-                    SizedBox(width: 8),
-                    Text('Excluir', style: TextStyle(color: Colors.red)),
-                  ],
-                ),
-              ),
-            ],
-            icon: const Icon(Icons.more_vert),
-          ),
-        ),
-      ),
-    );
-  },
-);
-
+                          return GestureDetector(
+                            child: Container(
+                              margin: const EdgeInsets.only(bottom: 5),
+                              decoration: BoxDecoration(
+                                color: backgroundColor,
+                                borderRadius: BorderRadius.circular(8.0),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black12,
+                                    blurRadius: 4,
+                                    spreadRadius: 1,
+                                  ),
+                                ],
+                              ),
+                              child: ListTile(
+                                leading: Icon(acessoIcon),
+                                title: Text(
+                                  lista.nome ?? 'Sem nome',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16.0,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  lista.categoria ?? '',
+                                  style: const TextStyle(fontSize: 14.0),
+                                ),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          ComprasListasItensPage(
+                                        id: lista.id!,
+                                        nome: lista.nome ?? 'Sem nome',
+                                      ),
+                                    ),
+                                  );
+                                },
+                                trailing: PopupMenuButton<String>(
+                                  onSelected: (String value) {
+                                    _handleMenuAction(
+                                      context,
+                                      value,
+                                      lista,
+                                      Provider.of<ListaDeComprasServices>(
+                                          context,
+                                          listen: false),
+                                    );
+                                  },
+                                  itemBuilder: (BuildContext context) => [
+                                    const PopupMenuItem<String>(
+                                      value: 'editar',
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.edit, size: 20),
+                                          SizedBox(width: 8),
+                                          Text('Editar'),
+                                        ],
+                                      ),
+                                    ),
+                                    const PopupMenuItem<String>(
+                                      value: 'compartilhar',
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.share, size: 20),
+                                          SizedBox(width: 8),
+                                          Text('Compartilhar'),
+                                        ],
+                                      ),
+                                    ),
+                                    const PopupMenuItem<String>(
+                                      value: 'excluir',
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.delete,
+                                              size: 20, color: Colors.red),
+                                          SizedBox(width: 8),
+                                          Text('Excluir',
+                                              style:
+                                                  TextStyle(color: Colors.red)),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                  icon: const Icon(Icons.more_vert),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      );
                     },
                   );
                 },
@@ -170,109 +180,119 @@ return ListView.builder(
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          final listaServices =
-              Provider.of<ListaDeComprasServices>(context, listen: false);
+      floatingActionButton: Align(
+        alignment: Alignment.bottomCenter, // Centraliza o botão horizontalmente
+        child: Padding(
+          padding: const EdgeInsets.only(
+              bottom: 16.0), // Ajuste a distância do fundo
+          child: FloatingActionButton(
+            onPressed: () {
+              final listaServices =
+                  Provider.of<ListaDeComprasServices>(context, listen: false);
 
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: const Text('Nova Lista de Compras'),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextFormField(
-                      controller: _nomeController,
-                      decoration: const InputDecoration(
-                        labelText: "Nome",
-                        border: OutlineInputBorder(),
-                      ),
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('Nova Lista de Compras'),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextFormField(
+                          controller: _nomeController,
+                          decoration: const InputDecoration(
+                            labelText: "Nome",
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: _categoriaCntroller,
+                          decoration: const InputDecoration(
+                            labelText: "Categoria",
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _categoriaCntroller,
-                      decoration: const InputDecoration(
-                        labelText: "Categoria",
-                        border: OutlineInputBorder(),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          _nomeController.clear();
+                          _categoriaCntroller.clear();
+                        },
+                        child: const Text('Cancelar'),
                       ),
-                    ),
-                  ],
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      _nomeController.clear();
-                      _categoriaCntroller.clear();
-                    },
-                    child: const Text('Cancelar'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      String nome = _nomeController.text.trim();
-                      String categoria = _categoriaCntroller.text.trim();
+                      ElevatedButton(
+                        onPressed: () async {
+                          String nome = _nomeController.text.trim();
+                          String categoria = _categoriaCntroller.text.trim();
 
-                      if (nome.isEmpty ||
-                          categoria.isEmpty) {
-                        CustomSnackBar.show(
-                          context,
-                          'Preencha todos os campos!',
-                          false,
-                        );
-                        return;
-                      }
+                          if (nome.isEmpty || categoria.isEmpty) {
+                            CustomSnackBar.show(
+                              context,
+                              'Preencha todos os campos!',
+                              false,
+                            );
+                            return;
+                          }
 
-                      var novaLista = ListaDeCompras(
-                          nome: nome,
-                          categoria: categoria,
+                          var novaLista = ListaDeCompras(
+                            nome: nome,
+                            categoria: categoria,
                           );
 
-                      var result = await listaServices.salvarLista(novaLista);
+                          var result =
+                              await listaServices.salvarLista(novaLista);
 
-                      Navigator.of(context).pop();
-                      _nomeController.clear();
-                      _categoriaCntroller.clear();
+                          Navigator.of(context).pop();
+                          _nomeController.clear();
+                          _categoriaCntroller.clear();
 
-                      CustomSnackBar.show(
-                        context,
-                        result['message'],
-                        result['success'],
-                      );
-                    },
-                    child: const Text('Salvar'),
-                  ),
-                ],
+                          CustomSnackBar.show(
+                            context,
+                            result['message'],
+                            result['success'],
+                          );
+                        },
+                        child: const Text('Salvar'),
+                      ),
+                    ],
+                  );
+                },
               );
             },
-          );
-        },
-        child: const Icon(Icons.add),
+            child: const Icon(Icons.add),
+          ),
+        ),
       ),
     );
   }
 
-  void _handleMenuAction(
-    BuildContext context,
-    String action,
-    ListaDeCompras lista,
-    ListaDeComprasServices listaDeComprasServices,
-  ) {
-    switch (action) {
-      case 'editar':
-        _editarLista(context, lista, listaDeComprasServices);
-        break;
-      case 'compartilhar':
-        _compartilharLista(context, lista, listaDeComprasServices);
-        break;
-      case 'excluir':
-        _excluirLista(context, lista, listaDeComprasServices);
-        break;
-    }
-  }
+  // Funções de menu...
+}
 
-  void _editarLista(
+void _handleMenuAction(
+  BuildContext context,
+  String action,
+  ListaDeCompras lista,
+  ListaDeComprasServices listaDeComprasServices,
+) {
+  switch (action) {
+    case 'editar':
+      _editarLista(context, lista, listaDeComprasServices);
+      break;
+    case 'compartilhar':
+      _compartilharLista(context, lista, listaDeComprasServices);
+      break;
+    case 'excluir':
+      _excluirLista(context, lista, listaDeComprasServices);
+      break;
+  }
+}
+
+void _editarLista(
   BuildContext context,
   ListaDeCompras lista,
   ListaDeComprasServices listaDeComprasServices,
@@ -375,11 +395,9 @@ return ListView.builder(
     },
   );
 }
-void _compartilharLista(
-  BuildContext context,
-  ListaDeCompras lista,
-  ListaDeComprasServices listaDeComprasServices
-) {
+
+void _compartilharLista(BuildContext context, ListaDeCompras lista,
+    ListaDeComprasServices listaDeComprasServices) {
   final currentUserId = listaDeComprasServices.user?.uid;
 
   // Verifica permissão de administrador
@@ -438,7 +456,8 @@ void _compartilharLista(
               items: permissoes.entries.map((entry) {
                 return DropdownMenuItem<String>(
                   value: entry.key,
-                  child: Text('${entry.key[0].toUpperCase()}${entry.key.substring(1)} - ${entry.value}'),
+                  child: Text(
+                      '${entry.key[0].toUpperCase()}${entry.key.substring(1)} - ${entry.value}'),
                 );
               }).toList(),
               onChanged: (value) {
@@ -489,7 +508,7 @@ void _compartilharLista(
   );
 }
 
- void _excluirLista(
+void _excluirLista(
   BuildContext context,
   ListaDeCompras lista,
   ListaDeComprasServices listaDeComprasServices,
@@ -510,7 +529,8 @@ void _compartilharLista(
             onPressed: () async {
               Navigator.of(context).pop();
 
-              final doc = await listaDeComprasServices.getListaDocumento(lista.id);
+              final doc =
+                  await listaDeComprasServices.getListaDocumento(lista.id);
 
               if (doc == null) {
                 CustomSnackBar.show(
@@ -567,6 +587,4 @@ void _compartilharLista(
       );
     },
   );
-}
-
 }
